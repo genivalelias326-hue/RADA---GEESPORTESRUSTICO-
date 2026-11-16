@@ -1,9 +1,9 @@
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#10284f">
 <title>RADAR GEESPORTESRÚSTICO</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -50,15 +50,15 @@ main{max-width:1100px;margin:18px auto;padding:0 14px}
 input,select{width:100%;padding:12px;border:1px solid #d0d7e2;border-radius:10px;background:white;color:var(--ink)}
 .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.product{border:1px solid var(--line);border-radius:14px;padding:13px;background:#fff}
+.product{border:1px solid var(--line);border-radius:14px;padding:13px;background:white}
 .product h3{font-size:16px;margin:8px 0}
 .product img{width:100%;max-height:190px;object-fit:contain;border-radius:10px;background:#f7f8fa}
 .pill{display:inline-block;padding:5px 8px;border-radius:30px;background:#eef3ff;color:#244f9b;font-size:11px;font-weight:800;margin:2px 3px 2px 0}
 .pill.good{background:#e8f7ef;color:#137547}
 .pill.hot{background:#fff1df;color:#9a4c00}
 .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:10px 0}
-.metrics div{background:#f5f7fb;padding:8px;border-radius:9px}
-.metrics b{display:block;font-size:14px}
+.metrics div{background:#f5f7fb;padding:8px;border-radius:9px;min-width:0}
+.metrics b{display:block;font-size:13px;overflow-wrap:anywhere}
 .metrics small{font-size:10px;color:var(--muted)}
 .actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
 .actions button{font-size:12px;padding:9px}
@@ -109,7 +109,7 @@ input,select{width:100%;padding:12px;border:1px solid #d0d7e2;border-radius:10px
 <div>
 <span class="pill hot">RADAR DE OPORTUNIDADES</span>
 <h1>Encontre produtos com potencial para vender mais.</h1>
-<p>Analise comissão, volume de vendas, concorrência e tendências em um só painel.</p>
+<p>Analise vendas, comissão, concorrência e tendências em um só painel.</p>
 <div class="row">
 <button class="orange" onclick="showTab('radar')">Explorar oportunidades</button>
 <button class="soft" onclick="showTab('video')">Ver dicas</button>
@@ -120,20 +120,22 @@ input,select{width:100%;padding:12px;border:1px solid #d0d7e2;border-radius:10px
 </div>
 </section>
 
-<div class="notice" id="notice">
-<b>Importante:</b> os dados de vendas, comissão e concorrência são os informados no cadastro. A integração automática com a API da Shopee depende de autorização da plataforma.
+<div class="notice">
+<b>Importante:</b> vendas, comissões e quantidade de afiliados dependem dos dados cadastrados ou de fontes autorizadas. A API da Shopee ainda depende de autorização.
 </div>
 
 <section class="authbox panel" id="authPanel">
 <h2>Acesse sua conta</h2>
 <p class="muted">Entre ou crie seu cadastro para acessar o Radar.</p>
-<label>E-mail<input id="authEmail" type="email" autocomplete="email" placeholder="seuemail@exemplo.com"></label>
+<label>E-mail<input id="authEmail" type="email" autocomplete="email" placeholder="Seu e-mail"></label>
 <label style="display:block;margin-top:9px">Senha<input id="authPassword" type="password" autocomplete="current-password" placeholder="Mínimo de 6 caracteres"></label>
 <div class="row">
 <button class="primary" onclick="signIn()">Entrar</button>
 <button class="soft" onclick="signUp()">Criar conta</button>
 </div>
-<div class="row"><button class="soft" onclick="resetPassword()">Esqueci minha senha</button></div>
+<div class="row">
+<button class="soft" onclick="resetPassword()">Esqueci minha senha</button>
+</div>
 <div id="authMessage" class="statusline"></div>
 </section>
 
@@ -149,15 +151,15 @@ input,select{width:100%;padding:12px;border:1px solid #d0d7e2;border-radius:10px
 <section class="stats">
 <div class="stat"><strong id="countProducts">0</strong><small>Produtos cadastrados</small></div>
 <div class="stat"><strong id="countHigh">0</strong><small>Comissão acima de R$ 20</small></div>
-<div class="stat"><strong id="countLow">0</strong><small>Baixa concorrência informada</small></div>
-<div class="stat"><strong id="countSaved">0</strong><small>Links salvos</small></div>
+<div class="stat"><strong id="countLow">0</strong><small>Poucos afiliados divulgando</small></div>
+<div class="stat"><strong id="countChampions">0</strong><small>PRODUTOS CAMPEÃO</small></div>
 </section>
 
 <nav class="tabs">
 <button class="active" data-tab="radar" onclick="showTab('radar')">🔎 Radar</button>
 <button data-tab="mais" onclick="showTab('mais')">🏆 Mais vendidos</button>
 <button data-tab="tendencias" onclick="showTab('tendencias')">📈 Em alta</button>
-<button data-tab="salvos" onclick="showTab('salvos')">⭐ Meus links</button>
+<button data-tab="salvos" onclick="showTab('salvos')">🔗 Meus links</button>
 <button data-tab="video" onclick="showTab('video')">🎥 Minhas dicas</button>
 <button data-tab="planos" onclick="showTab('planos')">💳 Assinaturas</button>
 <button data-tab="admin" id="adminTab" class="hidden" onclick="showTab('admin')">⚙️ Administração</button>
@@ -178,7 +180,11 @@ input,select{width:100%;padding:12px;border:1px solid #d0d7e2;border-radius:10px
 </select>
 <select id="category" onchange="renderProducts()">
 <option value="all">Todas categorias</option>
-<option>Casa</option><option>Eletrônicos</option><option>Esportes</option><option>Beleza</option><option>Outros</option>
+<option>Casa</option>
+<option>Eletrônicos</option>
+<option>Esportes</option>
+<option>Beleza</option>
+<option>Outros</option>
 </select>
 </div>
 <div class="row">
@@ -190,34 +196,71 @@ input,select{width:100%;padding:12px;border:1px solid #d0d7e2;border-radius:10px
 </section>
 
 <section id="mais" class="section">
-<div class="panel"><h2>Produtos mais vendidos</h2><p class="muted">Ordenados pelo volume de vendas informado no cadastro.</p><div id="bestList" class="products"></div></div>
+<div class="panel">
+<h2>Produtos mais vendidos</h2>
+<p class="muted">Ordenados pela quantidade de vendas informada no cadastro.</p>
+<div id="bestList" class="products"></div>
+</div>
 </section>
 
 <section id="tendencias" class="section">
-<div class="panel"><h2>Produtos em alta</h2><p class="muted">Produtos marcados como “Em alta” no cadastro.</p><div id="trendList" class="products"></div></div>
+<div class="panel">
+<h2>Produtos em alta</h2>
+<p class="muted">Produtos marcados como “Em alta” no cadastro.</p>
+<div id="trendList" class="products"></div>
+</div>
 </section>
 
 <section id="salvos" class="section">
-<div class="panel"><h2>Meus links salvos</h2><p class="muted">Esta lista é individual e vinculada à sua conta.</p><div id="savedList"></div></div>
+<div class="panel">
+<h2>Meus links salvos</h2>
+<p class="muted">Esta lista é individual e vinculada à sua conta.</p>
+<div id="savedList"></div>
+</div>
 </section>
 
 <section id="video" class="section">
 <div class="panel">
 <h2>Seu vídeo de 10 dicas</h2>
-<p class="muted">O espaço está preparado. O envio compartilhado do vídeo será ativado quando configurarmos o armazenamento de arquivos.</p>
-<div class="video"><div class="video-placeholder">🎥<b>SEU VÍDEO SERÁ EXIBIDO AQUI</b><small>Vídeo ainda não configurado.</small></div></div>
+<p class="muted">O espaço está preparado. O envio compartilhado do vídeo será configurado posteriormente.</p>
+<div class="video">
+<div class="video-placeholder">🎥<b>SEU VÍDEO SERÁ EXIBIDO AQUI</b><small>Vídeo ainda não configurado.</small></div>
+</div>
 </div>
 </section>
 
 <section id="planos" class="section">
 <div class="panel">
 <h2>Planos de acesso</h2>
-<p class="muted">A seleção abaixo registra seu interesse. Nenhum pagamento é processado nesta versão.</p>
+<p class="muted">A seleção registra seu interesse. Nenhum pagamento é processado nesta versão.</p>
 <div class="plans">
-<div class="plan"><span class="pill good">Teste grátis</span><h3>7 dias</h3><div class="price">R$ 0</div><p>Período experimental de 7 dias.</p><button class="soft" onclick="requestPlan('Teste grátis - 7 dias')">Solicitar teste</button></div>
-<div class="plan"><h3>Mensal</h3><div class="price">R$ 30</div><p>Acesso por mês.</p><button class="primary" onclick="requestPlan('Mensal - R$ 30/mês')">Escolher mensal</button></div>
-<div class="plan featured"><span class="pill hot">Plano anual</span><h3>Anual</h3><div class="price">R$ 330</div><p>Acesso por 12 meses.</p><button class="orange" onclick="requestPlan('Anual - R$ 330/ano')">Escolher anual</button></div>
-<div class="plan"><span class="pill good">Pagamento único</span><h3>Vitalício</h3><div class="price">R$ 850</div><p>Pagamento único, conforme os termos do serviço.</p><button class="dark" onclick="requestPlan('Vitalício - R$ 850')">Escolher vitalício</button></div>
+<div class="plan">
+<span class="pill good">Teste grátis</span>
+<h3>7 dias</h3>
+<div class="price">R$ 0</div>
+<p>Período experimental de 7 dias.</p>
+<button class="soft" onclick="requestPlan('Teste grátis - 7 dias')">Solicitar teste</button>
+</div>
+<div class="plan">
+<h3>Mensal</h3>
+<div class="price">R$ 30</div>
+<p>Acesso por mês.</p>
+<button class="primary" onclick="requestPlan('Mensal - R$ 30/mês')">Escolher mensal</button>
+</div>
+<div class="plan featured">
+<span class="pill hot">Plano anual</span>
+<h3>Anual</h3>
+<div class="price">R$ 330</div>
+<p>Acesso por 12 meses.</p>
+<button class="orange" onclick="requestPlan('Anual - R$ 330/ano')">Escolher anual</button>
+</div>
+<div class="plan">
+<span class="pill good">Pagamento único</span>
+<h3>Vitalício</h3>
+<div class="price">R$ 850</div>
+<p>Pagamento único, conforme os termos do serviço.</p>
+<button class="dark" onclick="requestPlan('Vitalício - R$ 850')">Escolher vitalício</button>
+</div>
 </div>
 <div id="planStatus" class="notice" style="display:none"></div>
 </div>
@@ -235,8 +278,8 @@ input,select{width:100%;padding:12px;border:1px solid #d0d7e2;border-radius:10px
 <label>Descrição<input id="pdesc"></label>
 <label>Preço (R$)<input type="number" min="0" step="0.01" id="pprice"></label>
 <label>Comissão (R$)<input required type="number" min="0" step="0.01" id="pcommission"></label>
-<label>Vendas informadas<input type="number" min="0" id="psales"></label>
-<label>Afiliados concorrentes<input type="number" min="0" id="paffiliates"></label>
+<label>Vendido / quantidade de vendas<input type="number" min="0" id="psales"></label>
+<label>Afiliados divulgando<input type="number" min="0" id="paffiliates"></label>
 <label>Tendência<select id="ptrend"><option>Sem informação</option><option>Em alta</option><option>Estável</option><option>Em queda</option></select></label>
 <label class="wide">URL da imagem<input type="url" id="pimage" placeholder="https://..."></label>
 <label class="wide">Link do produto<input type="url" id="plink" placeholder="https://..."></label>
@@ -248,144 +291,302 @@ input,select{width:100%;padding:12px;border:1px solid #d0d7e2;border-radius:10px
 </div>
 </form>
 </div>
-<div class="panel"><h2>Gerenciar produtos</h2><div id="adminList"></div></div>
+
+<div class="panel">
+<h2>Gerenciar produtos</h2>
+<div id="adminList"></div>
+</div>
+
 <div class="panel">
 <h2>Solicitações de plano</h2>
-<p class="muted">A ativação e a cobrança ainda são manuais. A integração com pagamento será feita em uma etapa posterior.</p>
+<p class="muted">A ativação e a cobrança ainda são manuais.</p>
 <div id="adminRequests"></div>
 </div>
 </section>
 </div>
 
-<div class="footer">RADAR GEESPORTESRÚSTICO • Dados exibidos dependem das informações cadastradas e de fontes autorizadas.</div>
+<div class="footer">RADAR GEESPORTESRÚSTICO • Dados sujeitos às fontes informadas.</div>
 </main>
 
 <script>
 const SUPABASE_URL='https://uwdhjiuufrsjqcbgtoyn.supabase.co';
 const SUPABASE_ANON_KEY='sb_publishable_XZG-ucLX-b4eq7kCu-cfAA_JctKNxZY';
 const ADMIN_USER_ID='df77bfd4-2f65-4026-9b79-26224bc128ea';
-const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
-let currentUser=null,isAdmin=false,products=[],saved=[];
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+let currentUser=null;
+let isAdmin=false;
+let products=[];
+let saved=[];
+
 const $=id=>document.getElementById(id);
 
 function message(id,msg,type=''){
-const el=$(id);el.textContent=msg;el.className='statusline '+type;
+const el=$(id);
+el.textContent=msg;
+el.className='statusline '+type;
 }
+
 function esc(s){
-return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+return String(s??'').replace(/[&<>"']/g,c=>({
+'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+}[c]));
 }
+
 function money(v){
 return v==null||v===''?'—':'R$ '+Number(v).toFixed(2).replace('.',',');
 }
 
 async function signUp(){
-const email=$('authEmail').value.trim(),password=$('authPassword').value;
+const email=$('authEmail').value.trim();
+const password=$('authPassword').value;
 if(!email||password.length<6){
-message('authMessage','Informe um e-mail válido e uma senha com pelo menos 6 caracteres.','error');return;
+message('authMessage','Informe um e-mail válido e uma senha com pelo menos 6 caracteres.','error');
+return;
 }
 const{error}=await db.auth.signUp({email,password});
-message('authMessage',error?error.message:'Cadastro enviado! Confira seu e-mail se a confirmação estiver ativada. Depois entre com sua conta.','ok');
+message('authMessage',error?error.message:'Cadastro enviado! Confira seu e-mail se a confirmação estiver ativada. Depois entre com sua conta.',error?'error':'ok');
 }
 
 async function signIn(){
-const email=$('authEmail').value.trim(),password=$('authPassword').value;
+const email=$('authEmail').value.trim();
+const password=$('authPassword').value;
 const{error}=await db.auth.signInWithPassword({email,password});
-if(error){message('authMessage',error.message,'error');return}
+if(error){
+message('authMessage',error.message,'error');
+return;
+}
 message('authMessage','Login realizado. Carregando seu acesso...','ok');
 await loadSession();
 }
 
 async function resetPassword(){
 const email=$('authEmail').value.trim();
-if(!email){message('authMessage','Digite seu e-mail para receber o link de recuperação.','error');return}
+if(!email){
+message('authMessage','Digite seu e-mail para receber o link de recuperação.','error');
+return;
+}
 const{error}=await db.auth.resetPasswordForEmail(email,{redirectTo:location.href});
-message('authMessage',error?error.message:'Se o e-mail estiver cadastrado, você receberá as instruções de recuperação.','ok');
+message('authMessage',error?error.message:'Se o e-mail estiver cadastrado, você receberá as instruções de recuperação.',error?'error':'ok');
 }
 
 async function signOut(){
-await db.auth.signOut();currentUser=null;isAdmin=false;
-$('appArea').classList.add('hidden');$('authPanel').classList.remove('hidden');
+await db.auth.signOut();
+currentUser=null;
+isAdmin=false;
+$('appArea').classList.add('hidden');
+$('authPanel').classList.remove('hidden');
 }
 
 async function loadSession(){
 const{data:{session}}=await db.auth.getSession();
-if(!session){$('authPanel').classList.remove('hidden');$('appArea').classList.add('hidden');return}
+if(!session){
+$('authPanel').classList.remove('hidden');
+$('appArea').classList.add('hidden');
+return;
+}
+
 currentUser=session.user;
-$('authPanel').classList.add('hidden');$('appArea').classList.remove('hidden');
+$('authPanel').classList.add('hidden');
+$('appArea').classList.remove('hidden');
 $('welcome').textContent='Olá, '+(currentUser.email||'assinante');
+
 isAdmin=currentUser.id===ADMIN_USER_ID;
 $('adminTab').classList.toggle('hidden',!isAdmin);
 
-const{data:member,error:mErr}=await db.from('assinantes').select('plano,status,data_expiracao').eq('user_id',currentUser.id).maybeSingle();
-if(mErr){message('appMessage','Não foi possível consultar seu plano: '+mErr.message,'error')}
-else{
-$('membership').textContent=member?('Plano: '+member.plano+' • Status: '+member.status):'Cadastro de assinante ainda não localizado';
+const{data:member,error:mErr}=await db.from('assinantes')
+.select('plano,status,data_expiracao')
+.eq('user_id',currentUser.id)
+.maybeSingle();
+
+if(mErr){
+message('appMessage','Não foi possível consultar seu plano: '+mErr.message,'error');
+}else{
+$('membership').textContent=member?
+('Plano: '+member.plano+' • Status: '+member.status):
+'Cadastro de assinante ainda não localizado';
+
 if(!isAdmin&&(!member||member.status!=='ativo')){
-message('appMessage','Seu cadastro está aguardando liberação do administrador. Você poderá acessar os produtos quando seu plano estiver ativo.','error');
+message('appMessage','Seu cadastro está aguardando liberação do administrador.','error');
 }
 }
+
 await loadProducts();
 await loadSaved();
 if(isAdmin)await loadAdminRequests();
 }
 
 async function loadProducts(){
-const{data,error}=await db.from('produtos').select('*').eq('ativo',true).order('criado_em',{ascending:false});
-if(error){message('appMessage','Erro ao carregar produtos: '+error.message,'error');products=[]}
-else products=data||[];
+const{data,error}=await db.from('produtos')
+.select('*')
+.eq('ativo',true)
+.order('criado_em',{ascending:false});
+
+if(error){
+message('appMessage','Erro ao carregar produtos: '+error.message,'error');
+products=[];
+}else{
+products=data||[];
+}
 renderProducts();
 }
 
 async function loadSaved(){
-const{data,error}=await db.from('links_salvos').select('*').eq('user_id',currentUser.id).order('criado_em',{ascending:false});
-if(error){message('appMessage','Erro ao carregar seus links: '+error.message,'error');saved=[]}
-else saved=data||[];
-updateStats();renderSaved();
+const{data,error}=await db.from('links_salvos')
+.select('*')
+.eq('user_id',currentUser.id)
+.order('criado_em',{ascending:false});
+
+if(error){
+message('appMessage','Erro ao carregar seus links: '+error.message,'error');
+saved=[];
+}else{
+saved=data||[];
+}
+updateStats();
+renderSaved();
 }
 
 function updateStats(){
 $('countProducts').textContent=products.length;
-$('countHigh').textContent=products.filter(p=>Number(p.comissao)>20).length;
-$('countLow').textContent=products.filter(p=>p.concorrencia!==null&&p.concorrencia!==''&&Number(p.concorrencia)<=3).length;
-$('countSaved').textContent=saved.length;
+
+$('countHigh').textContent=
+products.filter(p=>Number(p.comissao)>20).length;
+
+$('countLow').textContent=
+products.filter(p=>
+p.concorrencia!==null&&
+p.concorrencia!==''&&
+Number(p.concorrencia)<=3
+).length;
+
+$('countChampions').textContent=
+products.filter(p=>
+Number(p.comissao)>20&&
+p.concorrencia!==null&&
+p.concorrencia!==''&&
+Number(p.concorrencia)<=3
+).length;
 }
 
 function productCard(p){
 const isSaved=saved.some(s=>s.produto_id===p.id);
+
+const baixaConcorrencia=
+p.concorrencia!==null&&
+p.concorrencia!==''&&
+Number(p.concorrencia)<=3;
+
+const campeao=
+Number(p.comissao)>20&&baixaConcorrencia;
+
 return `<article class="product">
-${p.imagem_url?`<img src="${esc(p.imagem_url)}" alt="${esc(p.nome)}" loading="lazy">`:''}
+
+${p.imagem_url?
+`<img src="${esc(p.imagem_url)}" alt="${esc(p.nome)}" loading="lazy">`:''}
+
 <span class="pill">${esc(p.categoria||'Outros')}</span>
+
+${campeao?'<span class="pill hot">🏆 PRODUTO CAMPEÃO</span>':''}
+
 <h3>${esc(p.nome)}</h3>
+
 ${p.descricao?`<p class="muted">${esc(p.descricao)}</p>`:''}
+
 <div class="metrics">
-<div><b>${money(p.comissao)}</b><small>Comissão</small></div>
-<div><b>${p.vendas==null?'—':Number(p.vendas).toLocaleString('pt-BR')}</b><small>Vendas informadas</small></div>
-<div><b>${p.concorrencia==null?'—':esc(p.concorrencia)}</b><small>Afiliados concorrentes</small></div>
+
+<div>
+<b>VENDIDO ${p.vendas==null?'—':Number(p.vendas).toLocaleString('pt-BR')}</b>
+<small>Quantidade vendida</small>
 </div>
-<span class="pill ${Number(p.comissao)>20?'good':''}">${Number(p.comissao)>20?'Comissão acima de R$ 20':'Comissão até R$ 20'}</span>
+
+<div>
+<b>AFILIADO DIVULGANDO ${p.concorrencia==null?'—':esc(p.concorrencia)}</b>
+<small>Quantidade de afiliados</small>
+</div>
+
+<div>
+<b>${money(p.comissao)}</b>
+<small>Comissão informada</small>
+</div>
+
+</div>
+
+<span class="pill ${Number(p.comissao)>20?'good':''}">
+${Number(p.comissao)>20?'COMISSÃO ACIMA DE R$ 20':'COMISSÃO ATÉ R$ 20'}
+</span>
+
+<span class="pill ${baixaConcorrencia?'good':''}">
+${baixaConcorrencia?'POUCOS AFILIADOS DIVULGANDO':'CONCORRÊNCIA ALTA OU NÃO INFORMADA'}
+</span>
+
 <span class="pill">${esc(p.tendencia||'Sem informação')}</span>
+
 <div class="actions">
-<button class="soft" onclick="toggleSave('${p.id}')">${isSaved?'★ Salvo':'☆ Salvar link'}</button>
-${p.link_afiliado?`<button class="primary" onclick="openLink('${p.id}')">Abrir link</button>`:p.link_produto?`<button class="primary" onclick="openLink('${p.id}')">Ver produto</button>`:'<button class="soft" disabled>Link não cadastrado</button>'}
+<button class="soft" onclick="toggleSave('${p.id}')">
+${isSaved?'★ Link salvo':'☆ Salvar link'}
+</button>
+
+${p.link_afiliado?
+`<button class="primary" onclick="openLink('${p.id}')">Abrir link</button>`:
+p.link_produto?
+`<button class="primary" onclick="openLink('${p.id}')">Ver produto</button>`:
+'<button class="soft" disabled>Link não cadastrado</button>'}
 </div>
+
 </article>`;
 }
 
 function renderProducts(){
-const q=($('q')?.value||'').toLowerCase(),c=$('commission')?.value||'all',k=$('competition')?.value||'all',cat=$('category')?.value||'all';
-const list=products.filter(p=>(p.nome+' '+(p.categoria||'')).toLowerCase().includes(q)&&(c==='all'||Number(p.comissao)>20)&&(k==='all'||(p.concorrencia!==null&&p.concorrencia!==''&&Number(p.concorrencia)<=3))&&(cat==='all'||p.categoria===cat));
-$('productList').innerHTML=list.length?list.map(productCard).join(''):'<div class="empty">Nenhum produto encontrado ou seu acesso ainda não foi liberado.</div>';
-renderOther();updateStats();
+const q=($('q')?.value||'').toLowerCase();
+const c=$('commission')?.value||'all';
+const k=$('competition')?.value||'all';
+const cat=$('category')?.value||'all';
+
+const list=products.filter(p=>
+(p.nome+' '+(p.categoria||'')).toLowerCase().includes(q)&&
+(c==='all'||Number(p.comissao)>20)&&
+(k==='all'||(
+p.concorrencia!==null&&
+p.concorrencia!==''&&
+Number(p.concorrencia)<=3
+))&&
+(cat==='all'||p.categoria===cat)
+);
+
+$('productList').innerHTML=list.length?
+list.map(productCard).join(''):
+'<div class="empty">Nenhum produto encontrado ou seu acesso ainda não foi liberado.</div>';
+
+renderOther();
+updateStats();
 }
 
 function renderOther(){
-const best=[...products].sort((a,b)=>(Number(b.vendas)||0)-(Number(a.vendas)||0));
-$('bestList').innerHTML=best.length?best.map(productCard).join(''):'<div class="empty">Nenhum produto cadastrado.</div>';
+const best=[...products].sort((a,b)=>
+(Number(b.vendas)||0)-(Number(a.vendas)||0)
+);
+
+$('bestList').innerHTML=best.length?
+best.map(productCard).join(''):
+'<div class="empty">Nenhum produto cadastrado.</div>';
+
 const trends=products.filter(p=>p.tendencia==='Em alta');
-$('trendList').innerHTML=trends.length?trends.map(productCard).join(''):'<div class="empty">Nenhum produto marcado como em alta.</div>';
+
+$('trendList').innerHTML=trends.length?
+trends.map(productCard).join(''):
+'<div class="empty">Nenhum produto marcado como em alta.</div>';
+
 if(isAdmin){
-$('adminList').innerHTML=products.map(p=>`<div class="row" style="justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:8px 0"><span>${esc(p.nome)}</span><span><button class="soft" onclick="editProduct('${p.id}')">Editar</button> <button class="danger" onclick="deleteProduct('${p.id}')">Excluir</button></span></div>`).join('')||'Nenhum produto.';
+$('adminList').innerHTML=products.map(p=>
+`<div class="row" style="justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:8px 0">
+<span>${esc(p.nome)}</span>
+<span>
+<button class="soft" onclick="editProduct('${p.id}')">Editar</button>
+<button class="danger" onclick="deleteProduct('${p.id}')">Excluir</button>
+</span>
+</div>`
+).join('')||'Nenhum produto.';
 }
 }
 
@@ -396,26 +597,54 @@ renderProducts();
 }
 
 function showTab(id){
-if(id==='admin'&&!isAdmin){alert('Somente o administrador pode acessar esta área.');return}
-document.querySelectorAll('.section').forEach(x=>x.classList.toggle('active',x.id===id));
-document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('active',x.dataset.tab===id));
-window.scrollTo({top:document.querySelector('.tabs').offsetTop-8,behavior:'smooth'});
+if(id==='admin'&&!isAdmin){
+alert('Somente o administrador pode acessar esta área.');
+return;
+}
+document.querySelectorAll('.section').forEach(x=>
+x.classList.toggle('active',x.id===id)
+);
+document.querySelectorAll('.tabs button').forEach(x=>
+x.classList.toggle('active',x.dataset.tab===id)
+);
+window.scrollTo({
+top:document.querySelector('.tabs').offsetTop-8,
+behavior:'smooth'
+});
 }
 
 async function toggleSave(id){
 const p=products.find(x=>x.id===id);
 if(!p||!currentUser)return;
+
 const old=saved.find(s=>s.produto_id===id);
+
 if(old){
-const{error}=await db.from('links_salvos').delete().eq('id',old.id).eq('user_id',currentUser.id);
-if(error){alert('Não foi possível remover: '+error.message);return}
+const{error}=await db.from('links_salvos')
+.delete().eq('id',old.id).eq('user_id',currentUser.id);
+if(error){
+alert('Não foi possível remover: '+error.message);
+return;
+}
 }else{
 const url=p.link_afiliado||p.link_produto;
-if(!url){alert('Este produto ainda não tem link cadastrado.');return}
-const{error}=await db.from('links_salvos').insert({user_id:currentUser.id,produto_id:p.id,titulo:p.nome,url});
-if(error){alert('Não foi possível salvar: '+error.message);return}
+if(!url){
+alert('Este produto ainda não tem link cadastrado.');
+return;
 }
-await loadSaved();renderProducts();
+const{error}=await db.from('links_salvos').insert({
+user_id:currentUser.id,
+produto_id:p.id,
+titulo:p.nome,
+url:url
+});
+if(error){
+alert('Não foi possível salvar: '+error.message);
+return;
+}
+}
+await loadSaved();
+renderProducts();
 }
 
 function openLink(id){
@@ -425,25 +654,46 @@ if(url)window.open(url,'_blank','noopener,noreferrer');
 }
 
 function renderSaved(){
-$('savedList').innerHTML=saved.length?saved.map(s=>`<div class="row" style="justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:9px 0">
-<div><b>${esc(s.titulo)}</b><div class="muted" style="font-size:12px;word-break:break-all">${esc(s.url)}</div></div>
-<div><button class="primary" onclick="window.open('${esc(s.url)}','_blank','noopener,noreferrer')">Abrir</button>
-<button class="danger" onclick="removeSaved('${s.id}')">Remover</button></div></div>`).join(''):'<div class="empty">Você ainda não salvou links.</div>';
+$('savedList').innerHTML=saved.length?
+saved.map(s=>`
+<div class="row" style="justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:9px 0">
+<div>
+<b>${esc(s.titulo)}</b>
+<div class="muted" style="font-size:12px;word-break:break-all">${esc(s.url)}</div>
+</div>
+<div>
+<button class="primary" onclick="openSaved('${s.id}')">Abrir</button>
+<button class="danger" onclick="removeSaved('${s.id}')">Remover</button>
+</div>
+</div>
+`).join(''):
+'<div class="empty">Você ainda não salvou links.</div>';
+}
+
+function openSaved(id){
+const s=saved.find(x=>x.id===id);
+if(s)window.open(s.url,'_blank','noopener,noreferrer');
 }
 
 async function removeSaved(id){
-const{error}=await db.from('links_salvos').delete().eq('id',id).eq('user_id',currentUser.id);
-if(error){alert(error.message);return}
+const{error}=await db.from('links_salvos')
+.delete().eq('id',id).eq('user_id',currentUser.id);
+if(error){
+alert(error.message);
+return;
+}
 await loadSaved();
 }
 
 function clearProductForm(){
-$('productForm').reset();$('editId').value='';
+$('productForm').reset();
+$('editId').value='';
 }
 
 function editProduct(id){
 const p=products.find(x=>x.id===id);
 if(!p)return;
+
 $('editId').value=p.id;
 $('pname').value=p.nome||'';
 $('pcat').value=p.categoria||'Outros';
@@ -456,12 +706,21 @@ $('ptrend').value=p.tendencia||'Sem informação';
 $('pimage').value=p.imagem_url||'';
 $('plink').value=p.link_produto||'';
 $('paffiliate').value=p.link_afiliado||'';
-window.scrollTo({top:$('productForm').offsetTop-100,behavior:'smooth'});
+
+window.scrollTo({
+top:$('productForm').offsetTop-100,
+behavior:'smooth'
+});
 }
 
 async function saveProduct(e){
 e.preventDefault();
-if(!isAdmin){alert('Acesso restrito ao administrador.');return}
+
+if(!isAdmin){
+alert('Acesso restrito ao administrador.');
+return;
+}
+
 const v={
 nome:$('pname').value.trim(),
 categoria:$('pcat').value,
@@ -476,42 +735,88 @@ link_produto:$('plink').value.trim()||null,
 link_afiliado:$('paffiliate').value.trim()||null,
 ativo:true
 };
+
 const id=$('editId').value;
-const result=id?await db.from('produtos').update(v).eq('id',id):await db.from('produtos').insert(v);
-if(result.error){alert('Erro ao salvar produto: '+result.error.message);return}
+
+const result=id?
+await db.from('produtos').update(v).eq('id',id):
+await db.from('produtos').insert(v);
+
+if(result.error){
+alert('Erro ao salvar produto: '+result.error.message);
+return;
+}
+
 alert('Produto salvo no banco de dados!');
-clearProductForm();await loadProducts();
+clearProductForm();
+await loadProducts();
 }
 
 async function deleteProduct(id){
 if(!isAdmin||!confirm('Excluir este produto?'))return;
+
 const{error}=await db.from('produtos').delete().eq('id',id);
-if(error){alert('Erro ao excluir: '+error.message);return}
-await loadProducts();await loadSaved();
+
+if(error){
+alert('Erro ao excluir: '+error.message);
+return;
+}
+
+await loadProducts();
+await loadSaved();
 }
 
 async function requestPlan(plan){
 $('planStatus').style.display='block';
-$('planStatus').textContent='Você selecionou '+plan+'. A solicitação e a cobrança ainda não são enviadas automaticamente. Entre em contato com o administrador para ativação.';
+$('planStatus').textContent=
+'Você selecionou '+plan+'. A cobrança ainda não está integrada. Entre em contato com o administrador para ativação.';
 }
 
 async function loadAdminRequests(){
 if(!isAdmin)return;
-const{data,error}=await db.from('assinantes').select('user_id,email,plano,status,criado_em').order('criado_em',{ascending:false});
-$('adminRequests').innerHTML=error?('Erro: '+esc(error.message)):(data||[]).map(a=>`<div style="border-bottom:1px solid var(--line);padding:9px 0"><b>${esc(a.email)}</b><div class="muted">${esc(a.plano)} • ${esc(a.status)}</div><div class="row"><button class="soft" onclick="setMember('${a.user_id}','ativo')">Ativar</button><button class="danger" onclick="setMember('${a.user_id}','pendente')">Pendente</button></div></div>`).join('')||'Nenhuma solicitação.';
+
+const{data,error}=await db.from('assinantes')
+.select('user_id,email,plano,status,criado_em')
+.order('criado_em',{ascending:false});
+
+$('adminRequests').innerHTML=error?
+('Erro: '+esc(error.message)):
+(data||[]).map(a=>
+`<div style="border-bottom:1px solid var(--line);padding:9px 0">
+<b>${esc(a.email)}</b>
+<div class="muted">${esc(a.plano)} • ${esc(a.status)}</div>
+<div class="row">
+<button class="soft" onclick="setMember('${a.user_id}','ativo')">Ativar</button>
+<button class="danger" onclick="setMember('${a.user_id}','pendente')">Pendente</button>
+</div>
+</div>`
+).join('')||'Nenhuma solicitação.';
 }
 
 async function setMember(id,status){
 if(!isAdmin)return;
-const{error}=await db.from('assinantes').update({status}).eq('user_id',id);
-if(error){alert('Erro: '+error.message);return}
-await loadAdminRequests();alert('Status atualizado. A ativação de cobrança ainda é manual.');
+
+const{error}=await db.from('assinantes')
+.update({status}).eq('user_id',id);
+
+if(error){
+alert('Erro: '+error.message);
+return;
+}
+
+await loadAdminRequests();
+alert('Status atualizado. A cobrança ainda é manual.');
 }
 
 db.auth.onAuthStateChange((_event,session)=>{
-if(session){setTimeout(loadSession,0)}
-else{$('authPanel').classList.remove('hidden');$('appArea').classList.add('hidden')}
+if(session){
+setTimeout(loadSession,0);
+}else{
+$('authPanel').classList.remove('hidden');
+$('appArea').classList.add('hidden');
+}
 });
+
 loadSession();
 </script>
 </body>
