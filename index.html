@@ -113,6 +113,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#19bfff;box-sh
 .opportunity-track{height:8px;background:#061329;border-radius:20px;overflow:hidden;margin-top:8px}
 .opportunity-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,#ff8b24,#f52983)}
 .opportunity-note{font-size:10px;color:#a9c0d9;margin-top:7px;line-height:1.4}
+.shopee-import{border:1px solid #2788bf;background:linear-gradient(135deg,#102f50,#0a1d36);border-radius:14px;padding:14px;margin:12px 0}
+.shopee-import label{font-size:13px;font-weight:850;display:block;margin-bottom:8px}
 @media(max-width:760px){
 .head{align-items:flex-start;flex-direction:column}
 header .row{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -247,8 +249,8 @@ main{padding:0 11px}
 <option value="20">Acima de R$ 20</option>
 </select>
 <select id="competition" onchange="renderProducts()">
-<option value="all">Toda concorrência</option>
-<option value="low">Poucos afiliados (0 a 3)</option>
+<option value="all">Todos os produtos</option>
+<option value="popular">Produto mais procurado por compradores</option>
 </select>
 <select id="category" onchange="renderProducts()">
 <option value="all">Todas categorias</option>
@@ -326,6 +328,16 @@ main{padding:0 11px}
 <div class="panel">
 <h2>Cadastro de produto — administrador</h2>
 <p class="muted">Somente a conta administrativa pode cadastrar, editar e excluir produtos.</p>
+
+<div class="shopee-import">
+<label for="shopeeProductUrl">🔗 CADASTRAR PRODUTO PELO LINK DA SHOPEE</label>
+<input type="url" id="shopeeProductUrl" placeholder="Cole aqui o link do produto da Shopee">
+<div class="row">
+<button type="button" class="orange" id="fetchShopeeProductButton" onclick="fetchShopeeProduct()">🔎 BUSCAR DADOS DO PRODUTO</button>
+</div>
+<div id="shopeeProductMessage" class="statusline"></div>
+</div>
+
 <form id="productForm" onsubmit="saveProduct(event)">
 <input type="hidden" id="editId">
 <div class="formgrid">
@@ -390,6 +402,12 @@ function money(v){
  if(v===null||v===undefined||v==='')return '—';
  const n=Number(v);
  return Number.isFinite(n)?'R$ '+n.toFixed(2).replace('.',','):'—';
+}
+
+function numericValue(v){
+ if(v===null||v===undefined||v==='')return null;
+ const n=Number(String(v).replace(',','.'));
+ return Number.isFinite(n)?n:null;
 }
 
 /* ÍNDICE DE OPORTUNIDADE */
@@ -653,7 +671,50 @@ async function loadProducts(){
  renderProducts();
 }
 
-/* BUSCA AUTOMÁTICA NA SHOPEE */
+/* NORMALIZAÇÃO DOS RESULTADOS DA SHOPEE */
+function normalizeShopeeProduct(p,index=0){
+ const rawItemId=p.itemId??p.item_id??p.productId??p.product_id??null;
+ const hasStableItemId=rawItemId!==null&&rawItemId!==undefined&&String(rawItemId).trim()!=='';
+ const itemId=hasStableItemId?rawItemId:'sem-id-'+index;
+ const commissionValue=numericValue(p.commission);
+ const commissionRate=p.commissionRate??p.commission_rate??null;
+ const shopName=p.shop??p.shopName??p.shop_name??'Loja Shopee';
+ const productName=p.name??p.productName??p.product_name??'Produto Shopee';
+ const image=p.image??p.imageUrl??p.image_url??'';
+ const affiliateLink=p.affiliateLink??p.offerLink??p.affiliate_link??'';
+ const productLink=p.productLink??p.product_link??'';
+ const sales=p.sales??p.salesCount??p.sales_count??null;
+ const rating=p.rating??p.ratingStar??p.rating_star??null;
+ const price=p.priceMin??p.priceMax??p.price??null;
+
+ let description='Oferta encontrada na Shopee • Loja: '+shopName;
+ if(commissionRate!==null&&commissionRate!==''){
+  description+=' • Taxa de comissão informada: '+commissionRate+'%';
+ }
+
+ return{
+  id:'shopee-'+String(itemId),
+  nome:productName,
+  categoria:'Shopee',
+  descricao:description,
+  imagem_url:image,
+  preco:price,
+  vendas:sales,
+  concorrencia:null,
+  comissao:commissionValue,
+  tendencia:'Oferta Shopee',
+  link_afiliado:affiliateLink,
+  link_produto:productLink||affiliateLink,
+  origem:'shopee',
+  itemId:rawItemId,
+  hasStableItemId,
+  loja:shopName,
+  taxaComissao:commissionRate,
+  avaliacao:rating
+ };
+}
+
+/* BUSCA AUTOMÁTICA NA SHOPEE POR PALAVRA */
 async function searchShopee(){
  if(!currentUser){
   message('searchMessage','Entre na sua conta para pesquisar.','error');
@@ -691,44 +752,7 @@ async function searchShopee(){
    throw new Error('A resposta da integração não veio no formato esperado.');
   }
 
-  shopeeProducts=resultList.map((p,index)=>{
-   const rawItemId=p.itemId??p.item_id??p.productId??null;
-   const hasStableItemId=rawItemId!==null&&rawItemId!==undefined&&String(rawItemId).trim()!=='';
-   const itemId=hasStableItemId?rawItemId:'sem-id-'+index;
-   const commissionValue=p.commission!==undefined&&p.commission!==null&&p.commission!==''?Number(p.commission):null;
-   const commissionRate=p.commissionRate??p.commission_rate??null;
-   const shopName=p.shopName??p.shop_name??'Loja Shopee';
-   const productName=p.productName??p.name??p.product_name??'Produto Shopee';
-   const image=p.imageUrl??p.image??p.image_url??'';
-   const affiliateLink=p.offerLink??p.affiliateLink??p.affiliate_link??p.productLink??p.product_link??'';
-   const productLink=p.productLink??p.product_link??affiliateLink;
-
-   let description='Oferta encontrada na Shopee • Loja: '+shopName;
-   if(commissionRate!==null&&commissionRate!==''){
-    description+=' • Taxa de comissão informada: '+commissionRate+'%';
-   }
-
-   return{
-    id:'shopee-'+String(itemId),
-    nome:productName,
-    categoria:'Shopee',
-    descricao:description,
-    imagem_url:image,
-    vendas:p.sales??p.salesCount??p.sales_count??null,
-    concorrencia:null,
-    comissao:Number.isFinite(commissionValue)?commissionValue:null,
-    tendencia:'Oferta Shopee',
-    link_afiliado:affiliateLink,
-    link_produto:productLink,
-    origem:'shopee',
-    itemId:rawItemId,
-    hasStableItemId,
-    loja:shopName,
-    taxaComissao:commissionRate,
-    avaliacao:p.ratingStar??p.rating??null
-   };
-  });
-
+  shopeeProducts=resultList.map((p,index)=>normalizeShopeeProduct(p,index));
   calculateOpportunityScores(shopeeProducts);
   products=[...shopeeProducts,...manualProducts];
   renderProducts();
@@ -753,6 +777,76 @@ async function searchShopee(){
  }finally{
   button.disabled=false;
   button.textContent='🔎 BUSCAR NA SHOPEE';
+ }
+}
+
+/* BUSCA DE PRODUTO PELO LINK DA SHOPEE */
+async function fetchShopeeProduct(){
+ if(!isAdmin){
+  message('shopeeProductMessage','Somente o administrador pode utilizar esta função.','error');
+  return;
+ }
+
+ const url=$('shopeeProductUrl').value.trim();
+ if(!url){
+  message('shopeeProductMessage','Cole o link do produto da Shopee primeiro.','error');
+  $('shopeeProductUrl').focus();
+  return;
+ }
+
+ if(!/^https?:\/\/(www\.)?(shopee\.com\.br|shopee\.com)\//i.test(url)){
+  message('shopeeProductMessage','Confira o endereço. Cole um link válido de produto da Shopee.','error');
+  return;
+ }
+
+ const button=$('fetchShopeeProductButton');
+ button.disabled=true;
+ button.textContent='⏳ CONSULTANDO SHOPEE...';
+ message('shopeeProductMessage','Consultando os dados deste produto na Shopee. Aguarde...');
+
+ try{
+  const{data,error}=await db.functions.invoke('radar-shopee',{
+   body:{productUrl:url,page:1,limit:1}
+  });
+
+  if(error){
+   throw new Error(error.message||'Falha ao consultar o produto.');
+  }
+
+  if(data?.error){
+   throw new Error(typeof data.error==='string'?data.error:'A integração retornou um erro.');
+  }
+
+  const resultList=data?.products||data?.data?.products||[];
+  if(!Array.isArray(resultList)||!resultList.length){
+   throw new Error('A Shopee não retornou os dados deste produto. Confira o link ou preencha os campos manualmente.');
+  }
+
+  const p=resultList[0];
+  const normalized=normalizeShopeeProduct(p,0);
+
+  $('pname').value=normalized.nome||'';
+  $('pcat').value='Outros';
+  $('pdesc').value=normalized.loja?'Produto da Shopee • Loja: '+normalized.loja:'Produto encontrado na Shopee';
+  $('pprice').value=numericValue(normalized.preco)??'';
+  $('pcommission').value=numericValue(normalized.comissao)??'';
+  $('psales').value=numericValue(normalized.vendas)??'';
+  $('paffiliates').value='';
+  $('ptrend').value='Sem informação';
+  $('pimage').value=normalized.imagem_url||'';
+  $('plink').value=normalized.link_produto||url;
+  $('paffiliate').value=normalized.link_afiliado||'';
+  $('editId').value='';
+
+  message('shopeeProductMessage','Dados encontrados! Confira os campos preenchidos, escolha a categoria e complete a comissão caso não tenha sido retornada. Depois clique em Salvar produto.','ok');
+  $('productForm').scrollIntoView({behavior:'smooth',block:'start'});
+  $('pname').focus();
+ }catch(err){
+  console.error('Erro ao importar produto:',err);
+  message('shopeeProductMessage','Não foi possível importar: '+(err?.message||String(err)),'error');
+ }finally{
+  button.disabled=false;
+  button.textContent='🔎 BUSCAR DADOS DO PRODUTO';
  }
 }
 
@@ -785,15 +879,16 @@ function updateStats(){
 /* CARTÃO DO PRODUTO */
 function productCard(p){
  const isShopee=p.origem==='shopee';
- const isSaved=!isShopee&&saved.some(s=>s.produto_id===p.id);
- const baixaConcorrencia=p.concorrencia!==null&&p.concorrencia!==''&&Number(p.concorrencia)<=3;
- const campeao=Number(p.comissao)>20&&baixaConcorrencia;
+ const isSaved=!isShopee&&saved.some(s=>String(s.produto_id)===String(p.id));
+ const rating=numericValue(p.avaliacao);
+ const muitoBemAvaliado=rating!==null&&rating>=4.5;
+ const productId=String(p.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
 
  return `<article class="product">
  ${p.imagem_url?`<img src="${esc(p.imagem_url)}" alt="${esc(p.nome)}" loading="lazy">`:''}
  <span class="pill">${esc(p.categoria||'Outros')}</span>
  ${isShopee?'<span class="pill good">RESULTADO SHOPEE</span>':''}
- ${campeao?'<span class="pill hot">🏆 PRODUTO CAMPEÃO</span>':''}
+ ${muitoBemAvaliado?'<span class="pill hot">⭐ MUITO BEM AVALIADO</span>':''}
  <h3>${esc(p.nome)}</h3>
  ${p.descricao?`<p class="muted">${esc(p.descricao)}</p>`:''}
  ${isShopee?opportunityHtml(p):''}
@@ -803,16 +898,21 @@ function productCard(p){
   <div><b>${money(p.comissao)}</b><small>Comissão em valor</small></div>
  </div>
  ${p.taxaComissao!==null&&p.taxaComissao!==undefined&&p.taxaComissao!==''?`<span class="pill good">TAXA INFORMADA: ${esc(p.taxaComissao)}%</span>`:''}
- ${p.avaliacao!==null&&p.avaliacao!==undefined?`<span class="pill">AVALIAÇÃO: ${esc(p.avaliacao)}</span>`:''}
+ ${p.avaliacao!==null&&p.avaliacao!==undefined&&p.avaliacao!==''?`<span class="pill">AVALIAÇÃO: ${esc(p.avaliacao)}</span>`:''}
  ${!isShopee?`
  <span class="pill ${Number(p.comissao)>20?'good':''}">${Number(p.comissao)>20?'COMISSÃO ACIMA DE R$ 20':'COMISSÃO ATÉ R$ 20'}</span>
- <span class="pill ${baixaConcorrencia?'good':''}">${baixaConcorrencia?'BAIXA CONCORRÊNCIA':'CONCORRÊNCIA ALTA OU NÃO INFORMADA'}</span>
  <span class="pill">${esc(p.tendencia||'Sem informação')}</span>
  `:''}
  <div class="actions">
- ${isShopee?'<button class="soft" disabled>Produto da Shopee</button>':`<button class="soft" onclick="toggleSave('${p.id}')">${isSaved?'★ Link salvo':'☆ Salvar link'}</button>`}
- ${p.link_afiliado||p.link_produto?`<button class="primary" onclick="openLink('${p.id}')">${isShopee?'🛒 Abrir oferta':'Abrir link'}</button>`:'<button class="soft" disabled>Link não cadastrado</button>'}
- <button class="soft" onclick="shareProduct('${p.id}')">📤 Compartilhar</button>
+ ${isShopee?'<button class="soft" disabled>Produto da Shopee</button>':`
+ <button class="soft" onclick="toggleSave('${productId}')">${isSaved?'★ Link salvo':'☆ Salvar link'}</button>
+ ${isAdmin?`
+ <button class="orange" onclick="editProduct('${productId}')">✏️ Editar</button>
+ <button class="danger" onclick="deleteProduct('${productId}')">🗑️ Excluir</button>
+ `:''}
+ `}
+ ${p.link_afiliado||p.link_produto?`<button class="primary" onclick="openLink('${productId}')">${isShopee?'🛒 Abrir oferta':'Abrir link'}</button>`:'<button class="soft" disabled>Link não cadastrado</button>'}
+ <button class="soft" onclick="shareProduct('${productId}')">📤 Compartilhar</button>
  </div>
  </article>`;
 }
@@ -875,12 +975,16 @@ function renderProducts(){
  const k=$('competition')?.value||'all';
  const cat=$('category')?.value||'all';
 
- const list=products.filter(p=>
+ let list=products.filter(p=>
   (p.nome+' '+(p.categoria||'')).toLowerCase().includes(q)&&
   (c==='all'||Number(p.comissao)>20)&&
-  (k==='all'||(p.concorrencia!==null&&p.concorrencia!==''&&Number(p.concorrencia)<=3))&&
+  (k==='all'||(k==='popular'&&Number(p.vendas)>0))&&
   (cat==='all'||p.categoria===cat)
  );
+
+ if(k==='popular'){
+  list.sort((a,b)=>(Number(b.vendas)||0)-(Number(a.vendas)||0));
+ }
 
  $('productList').innerHTML=list.length?list.map(productCard).join(''):'<div class="empty">Nenhum produto encontrado. Digite uma palavra e clique em Buscar na Shopee.</div>';
  renderOther();
@@ -898,15 +1002,17 @@ function renderOther(){
  $('trendList').innerHTML=trends.length?trends.map(productCard).join(''):'<div class="empty">Ainda não há produtos com vendas ou tendência informada para recomendar.</div>';
 
  if(isAdmin){
-  $('adminList').innerHTML=manualProducts.map(p=>`
+  $('adminList').innerHTML=manualProducts.map(p=>{
+   const id=String(p.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+   return `
    <div class="row" style="justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:8px 0">
     <span>${esc(p.nome)}</span>
     <span>
-     <button class="soft" onclick="editProduct('${p.id}')">Editar</button>
-     <button class="danger" onclick="deleteProduct('${p.id}')">Excluir</button>
+     <button class="soft" onclick="editProduct('${id}')">Editar</button>
+     <button class="danger" onclick="deleteProduct('${id}')">Excluir</button>
     </span>
-   </div>
-  `).join('')||'Nenhum produto manual cadastrado.';
+   </div>`;
+  }).join('')||'Nenhum produto manual cadastrado.';
  }
 }
 
@@ -922,13 +1028,12 @@ function clearFilters(){
 }
 
 function showTab(id){
- document.querySelectorAll('.section').forEach(x=>x.classList.toggle('active',x.id===id));
- document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('active',x.dataset.tab===id));
  if(id==='admin'&&!isAdmin){
   alert('Somente o administrador pode acessar esta área.');
-  showTab('radar');
-  return;
+  id='radar';
  }
+ document.querySelectorAll('.section').forEach(x=>x.classList.toggle('active',x.id===id));
+ document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('active',x.dataset.tab===id));
  window.scrollTo({top:document.querySelector('.tabs').offsetTop-8,behavior:'smooth'});
 }
 
@@ -1032,11 +1137,20 @@ async function removeSaved(id){
 function clearProductForm(){
  $('productForm').reset();
  $('editId').value='';
+ $('shopeeProductUrl').value='';
+ message('shopeeProductMessage','');
 }
 
 function editProduct(id){
+ if(!isAdmin){
+  alert('Acesso restrito ao administrador.');
+  return;
+ }
+
  const p=manualProducts.find(x=>String(x.id)===String(id));
  if(!p)return;
+
+ showTab('admin');
  $('editId').value=p.id;
  $('pname').value=p.nome||'';
  $('pcat').value=p.categoria||'Outros';
@@ -1049,7 +1163,7 @@ function editProduct(id){
  $('pimage').value=p.imagem_url||'';
  $('plink').value=p.link_produto||'';
  $('paffiliate').value=p.link_afiliado||'';
- window.scrollTo({top:$('productForm').offsetTop-100,behavior:'smooth'});
+ $('productForm').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 async function saveProduct(e){
