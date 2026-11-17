@@ -7,6 +7,114 @@
 <style>
 :root{--navy:#10284f;--blue:#155eef;--orange:#ff8a00;--bg:#f3f6fb;--ink:#172033;--muted:#667085;--line:#e4e9f1;--green:#13834a}*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--ink)}button,input,select,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:11px;padding:11px 14px;font-weight:800}.primary{background:var(--blue);color:white}.dark{background:var(--navy);color:white}.soft{background:#eaf0ff;color:var(--blue)}.orange{background:var(--orange);color:#241500}.danger{background:#fff0ef;color:#b42318}.muted{color:var(--muted)}header{background:linear-gradient(120deg,#0b1e3b,#174b8c);color:#fff;padding:18px 16px 25px}.head{max-width:1100px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{font-weight:950;font-size:20px;letter-spacing:.3px}.brand span{color:#ff9b22}.tag{font-size:11px;color:#d7e5ff;margin-top:4px}header button{background:#ffffff1c;color:white;border:1px solid #ffffff35}main{max-width:1100px;margin:18px auto;padding:0 14px}.hero{background:linear-gradient(120deg,#10284f,#1d5595);color:white;border-radius:20px;padding:20px;display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:center}.hero h1{font-size:clamp(24px,4vw,36px);margin:8px 0}.hero p{color:#d8e5f7;line-height:1.5}.video{background:#07152b;border:1px solid #54719b;border-radius:15px;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;text-align:center;color:#d8e5f7;overflow:hidden}.video video{width:100%;height:100%;object-fit:contain;background:#000}.video-placeholder{padding:16px}.video-placeholder b{display:block;color:white;margin:8px 0}.video-placeholder small{display:block;color:#b7c9e2}.notice{margin:12px 0;padding:11px 13px;border-radius:12px;background:#fff8e8;border:1px solid #f2d7a4;color:#744b00;font-size:13px;line-height:1.4}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}.stat,.panel,.plan{background:white;border:1px solid var(--line);border-radius:16px;padding:15px}.stat strong{font-size:23px;display:block;color:var(--navy)}.stat small{color:var(--muted)}.tabs{display:flex;gap:8px;overflow:auto;padding:3px 0 12px}.tabs button{white-space:nowrap;background:white;color:#475467;border:1px solid var(--line)}.tabs button.active{background:var(--navy);color:white;border-color:var(--navy)}.section{display:none}.section.active{display:block}.panel{margin:10px 0}.panel h2{font-size:18px;margin:0 0 12px}.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px}input,select,textarea{width:100%;padding:12px;border:1px solid #d0d7e2;border-radius:10px;background:white;color:var(--ink)}.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.product{border:1px solid var(--line);border-radius:14px;padding:13px;background:#fff}.product h3{font-size:16px;margin:8px 0}.pill{display:inline-block;padding:5px 8px;border-radius:30px;background:#eef3ff;color:#244f9b;font-size:11px;font-weight:800;margin:2px 3px 2px 0}.pill.good{background:#e8f7ef;color:#137547}.pill.hot{background:#fff1df;color:#9a4c00}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:10px 0}.metrics div{background:#f5f7fb;padding:8px;border-radius:9px}.metrics b{display:block;font-size:14px}.metrics small{font-size:10px;color:var(--muted)}.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.actions button{font-size:12px;padding:9px}.empty{padding:24px;text-align:center;color:var(--muted);background:white;border:1px dashed #cbd5e1;border-radius:14px}.plans{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.plan h3{margin:8px 0}.price{font-size:25px;font-weight:900;color:var(--navy)}.plan p{font-size:13px;line-height:1.45;color:var(--muted);min-height:55px}.plan.featured{border:2px solid var(--orange)}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.formgrid label{font-size:12px;font-weight:800;color:#475467}.formgrid label input,.formgrid label select{margin-top:5px}.formgrid .wide{grid-column:1/-1}.footer{text-align:center;padding:25px;color:#7b8798;font-size:12px}.authbox{max-width:520px;margin:14px auto}.hidden{display:none!important}.product img{width:100%;max-height:190px;object-fit:contain;border-radius:10px;background:#f7f8fa}.statusline{font-size:13px;margin-top:8px;line-height:1.4}.statusline.error{color:#b42318}.statusline.ok{color:#137547}
 @media(max-width:760px){.hero{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.filters{grid-template-columns:1fr 1fr}.products{grid-template-columns:1fr}.plans{grid-template-columns:1fr 1fr}}@media(max-width:420px){.plans{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}.formgrid .wide{grid-column:auto}}
+
+/* ===== REDESIGN PROFISSIONAL — mantém estrutura e funcionalidades ===== */
+:root{
+  --navy:#101d3a;--blue:#2563eb;--orange:#f59e0b;--bg:#f4f7fc;
+  --ink:#17233b;--muted:#68758c;--line:#e5eaf2;--green:#168653;
+}
+*{box-sizing:border-box}
+body{
+  background:linear-gradient(180deg,#edf3ff 0,#f7f9fd 300px,#f4f7fc 100%);
+  color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  line-height:1.5;-webkit-font-smoothing:antialiased
+}
+header{
+  background:linear-gradient(115deg,#0b1730 0%,#142d59 58%,#1e4a8a 100%);
+  padding:18px 20px 22px;box-shadow:0 10px 28px #10284f22;
+  border-bottom:1px solid #ffffff20
+}
+.head{max-width:1180px;flex-wrap:wrap}
+.brand{font-size:clamp(18px,2.5vw,24px);letter-spacing:.5px;font-weight:950}
+.brand span{color:#ffc15b}
+.tag{font-size:10px;letter-spacing:1.6px;font-weight:800;color:#c8d8f2}
+header .row{gap:7px}
+header button{
+  border-radius:12px;padding:10px 13px;background:#ffffff12;
+  border:1px solid #ffffff30;color:#fff;font-size:12px;transition:.2s
+}
+header button:hover{background:#ffffff24;transform:translateY(-1px)}
+main{max-width:1180px;margin:24px auto;padding:0 18px}
+.hero{
+  background:radial-gradient(circle at 90% 15%,#3975c8 0,transparent 32%),
+    linear-gradient(125deg,#101d3a 0%,#173b70 58%,#20569a 100%);
+  border:1px solid #ffffff20;border-radius:24px;padding:clamp(22px,4vw,36px);
+  box-shadow:0 18px 42px #10284f25;gap:24px
+}
+.hero .pill{background:#ffffff18;color:#ffcf79;border:1px solid #ffffff30}
+.hero h1{font-size:clamp(25px,4vw,39px);line-height:1.12;letter-spacing:-.8px;max-width:650px}
+.hero p{font-size:15px;color:#dce8fa;max-width:600px}
+.hero .orange{background:linear-gradient(135deg,#ffbd52,#f59e0b);color:#2c1b00}
+.hero .soft{background:#ffffff16;color:#fff;border:1px solid #ffffff35}
+.video{border-radius:18px;border:1px solid #91b4e455;box-shadow:0 12px 30px #0003}
+.notice{border-radius:14px;padding:13px 16px;box-shadow:0 4px 14px #243b6310}
+.panel,.stat,.plan{
+  border:1px solid #e3e9f2;border-radius:19px;background:#fff;
+  box-shadow:0 6px 22px #1b37600a
+}
+.panel{padding:20px;margin:13px 0}
+.panel h2{font-size:20px;font-weight:850;letter-spacing:-.3px;color:#182744}
+.stat{padding:18px 19px;position:relative;overflow:hidden}
+.stat:after{content:"";position:absolute;right:-18px;top:-22px;width:75px;height:75px;border-radius:50%;background:#eaf1ff}
+.stat strong{position:relative;z-index:1;font-size:30px;letter-spacing:-1px;color:#173b70}
+.stat small{position:relative;z-index:1;font-size:12px;font-weight:700;color:#758198}
+.tabs{gap:9px;padding:5px 0 14px;scrollbar-width:thin}
+.tabs button{
+  border-radius:13px;padding:12px 16px;background:#fff;border:1px solid #e2e8f0;
+  color:#4b5870;font-weight:800;box-shadow:0 3px 10px #1c35500a;transition:.2s
+}
+.tabs button.active{background:linear-gradient(135deg,#142d59,#2563eb);color:#fff;border-color:transparent;box-shadow:0 7px 18px #2563eb30}
+.section.active{animation:fadeIn .22s ease}
+@keyframes fadeIn{from{opacity:.65;transform:translateY(4px)}to{opacity:1;transform:none}}
+input,select,textarea{
+  border:1px solid #d8e0ec;border-radius:12px;padding:13px 14px;
+  outline:none;transition:border-color .18s,box-shadow .18s
+}
+input:focus,select:focus,textarea:focus{border-color:#5b8def;box-shadow:0 0 0 3px #2563eb18}
+button{border-radius:12px;transition:transform .18s,box-shadow .18s,filter .18s}
+button:hover{filter:brightness(1.03);transform:translateY(-1px)}
+button:active{transform:translateY(0)}
+.primary{background:linear-gradient(135deg,#3478f6,#1d55d8);box-shadow:0 6px 15px #2563eb25}
+.dark{background:linear-gradient(135deg,#142d59,#0b1730)}
+.soft{background:#edf3ff;color:#2458bd}
+.orange{background:linear-gradient(135deg,#ffc15b,#f59e0b)}
+.product{border:1px solid #e3e9f2;border-radius:17px;padding:15px;box-shadow:0 5px 16px #1c35500a;transition:.2s}
+.product:hover{transform:translateY(-2px);box-shadow:0 12px 25px #1c355018}
+.product h3{font-size:17px;line-height:1.3;color:#172744}
+.product img{border-radius:13px;background:#f5f7fb}
+.pill{border-radius:8px;font-size:10px;letter-spacing:.2px;padding:6px 9px}
+.metrics div{background:#f4f7fc;border:1px solid #e9eef6;border-radius:11px}
+.actions button{border-radius:10px}
+.empty{border-radius:16px;background:#f9fbff;border-color:#d6dfed}
+.plans{gap:12px}
+.plan{padding:18px}
+.plan.featured{border:2px solid #f2ae3b;box-shadow:0 8px 24px #f59e0b18}
+.price{color:#173b70;font-size:29px}
+.formgrid label{color:#42516a}
+.authbox{max-width:560px}
+.authbox.panel{padding:25px}
+.statusline{font-weight:650}
+.footer{padding:30px 16px;color:#8490a4}
+@media(max-width:760px){
+  header{padding:15px 14px 18px}
+  .head{align-items:flex-start}
+  header .row{width:100%;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))}
+  header button{font-size:11px;padding:10px 8px}
+  main{margin:16px auto;padding:0 12px}
+  .hero{padding:21px;border-radius:20px}
+  .stats{gap:9px}
+  .stat{padding:15px}
+  .stat strong{font-size:27px}
+  .panel{padding:17px}
+  .tabs button{padding:11px 14px}
+}
+@media(max-width:420px){
+  .hero .row button{width:100%}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stat small{font-size:11px}
+  .panel h2{font-size:18px}
+}
+
 </style></head>
 <body>
 <header><div class="head"><div><div class="brand">RADAR <span>GEESPORTESRÚSTICO</span></div><div class="tag">INTELIGÊNCIA DE PRODUTOS PARA AFILIADOS</div></div><div class="row" style="margin:0;align-items:center"><button type="button" onclick="shareRadar()">📤 Compartilhar</button><button type="button" onclick="copyRadarLink()">🔗 Copiar link</button><button type="button" id="accountButton" onclick="switchAccount()">Entrar / trocar conta</button><button onclick="showTab('planos')">Planos de acesso</button></div></div></header>
