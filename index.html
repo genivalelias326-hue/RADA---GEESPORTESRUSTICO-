@@ -9,7 +9,7 @@
 @media(max-width:760px){.hero{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.filters{grid-template-columns:1fr 1fr}.products{grid-template-columns:1fr}.plans{grid-template-columns:1fr 1fr}}@media(max-width:420px){.plans{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}.formgrid .wide{grid-column:auto}}
 </style></head>
 <body>
-<header><div class="head"><div><div class="brand">RADAR <span>GEESPORTESRÚSTICO</span></div><div class="tag">INTELIGÊNCIA DE PRODUTOS PARA AFILIADOS</div></div><button onclick="showTab('planos')">Planos de acesso</button></div></header>
+<header><div class="head"><div><div class="brand">RADAR <span>GEESPORTESRÚSTICO</span></div><div class="tag">INTELIGÊNCIA DE PRODUTOS PARA AFILIADOS</div></div><div class="row" style="margin:0;align-items:center"><button type="button" onclick="shareRadar()">📤 Compartilhar</button><button type="button" onclick="copyRadarLink()">🔗 Copiar link</button><button onclick="showTab('planos')">Planos de acesso</button></div></div></header>
 <main>
 <section class="hero"><div><span class="pill hot">RADAR DE OPORTUNIDADES</span><h1>AQUI ESTÁ O CAMINHO PARA DESTRAVAR SUAS VENDAS!</h1><p>Veja logo abaixo minhas 10 dicas para você melhorar suas estratégias, atrair clientes e vender muito mais!</p><div class="row"><button class="orange" onclick="showTab('radar')">Explorar oportunidades</button><button class="soft" onclick="showTab('video')">🎥 ASSISTA ÀS 10 DICAS E COMECE A COLOCAR EM PRÁTICA!</button></div></div><div class="video" id="heroVideo"><div class="video-placeholder">▶<b>MINHAS 10 DICAS PARA VENDER MAIS</b><small>O vídeo ficará disponível aqui para os assinantes ativos.</small></div></div></section>
 <div class="notice" id="notice"><b>Importante:</b> os dados de vendas, comissão e concorrência são os informados no cadastro. A integração automática com a API da Shopee depende de autorização da plataforma.</div>
@@ -72,7 +72,7 @@ ${p.descricao?`<p class="muted">${esc(p.descricao)}</p>`:''}
 <div class="actions">
 <button class="soft" onclick="toggleSave('${p.id}')">${isSaved?'★ Link salvo':'☆ Salvar link'}</button>
 ${p.link_afiliado?`<button class="primary" onclick="openLink('${p.id}')">Abrir link</button>`:p.link_produto?`<button class="primary" onclick="openLink('${p.id}')">Ver produto</button>`:'<button class="soft" disabled>Link não cadastrado</button>'}
-</div></article>`;
+<button class="soft" onclick="shareProduct('${p.id}')">📤 Compartilhar</button></div></article>`;
 }
 
 function renderProducts(){const q=($('q')?.value||'').toLowerCase(),c=$('commission')?.value||'all',k=$('competition')?.value||'all',cat=$('category')?.value||'all';const list=products.filter(p=>(p.nome+' '+(p.categoria||'')).toLowerCase().includes(q)&&(c==='all'||Number(p.comissao)>20)&&(k==='all'||(p.concorrencia!==null&&p.concorrencia!==''&&Number(p.concorrencia)<=3))&&(cat==='all'||p.categoria===cat));$('productList').innerHTML=list.length?list.map(productCard).join(''):'<div class="empty">Nenhum produto encontrado ou seu acesso ainda não foi liberado.</div>';renderOther();updateStats()}
@@ -80,6 +80,23 @@ function renderOther(){const best=[...products].sort((a,b)=>(Number(b.vendas)||0
 function clearFilters(){['q'].forEach(id=>$(id).value='');['commission','competition','category'].forEach(id=>$(id).value='all');renderProducts()}
 function showTab(id){document.querySelectorAll('.section').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('active',x.dataset.tab===id));if(id==='admin'&&!isAdmin){alert('Somente o administrador pode acessar esta área.');showTab('radar');return}window.scrollTo({top:document.querySelector('.tabs').offsetTop-8,behavior:'smooth'})}
 async function toggleSave(id){const p=products.find(x=>x.id===id);if(!p||!currentUser)return;const old=saved.find(s=>s.produto_id===id);if(old){const{error}=await db.from('links_salvos').delete().eq('id',old.id).eq('user_id',currentUser.id);if(error){alert('Não foi possível remover: '+error.message);return}}else{const url=p.link_afiliado||p.link_produto;if(!url){alert('Este produto ainda não tem link cadastrado.');return}const{error}=await db.from('links_salvos').insert({user_id:currentUser.id,produto_id:p.id,titulo:p.nome,url});if(error){alert('Não foi possível salvar: '+error.message);return}}await loadSaved();renderProducts()}
+async function shareRadar(){
+ const url=location.href;
+ const data={title:'RADAR GEESPORTESRÚSTICO',text:'Acesse o RADAR GEESPORTESRÚSTICO e confira oportunidades para afiliados!',url};
+ if(navigator.share){try{await navigator.share(data)}catch(e){}}
+ else{await copyRadarLink();alert('Link do RADAR copiado! Agora você pode enviar pelo WhatsApp.')}
+}
+async function copyRadarLink(){
+ try{await navigator.clipboard.writeText(location.href);alert('Link do RADAR copiado com sucesso!')}
+ catch(e){const t=document.createElement('textarea');t.value=location.href;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();alert('Link do RADAR copiado!')}
+}
+async function shareProduct(id){
+ const p=products.find(x=>x.id===id);if(!p)return;
+ const url=p.link_afiliado||p.link_produto||location.href;
+ const data={title:p.nome,text:'Confira este produto no RADAR GEESPORTESRÚSTICO: '+p.nome,url};
+ if(navigator.share){try{await navigator.share(data)}catch(e){}}
+ else{try{await navigator.clipboard.writeText(data.text+' '+url);alert('Link do produto copiado!')}catch(e){alert('Não foi possível copiar o link.')}}
+}
 function openLink(id){const p=products.find(x=>x.id===id);const url=p&&(p.link_afiliado||p.link_produto);if(url)window.open(url,'_blank','noopener,noreferrer')}
 function renderSaved(){$('savedList').innerHTML=saved.length?saved.map(s=>`<div class="row" style="justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:9px 0"><div><b>${esc(s.titulo)}</b><div class="muted" style="font-size:12px;word-break:break-all">${esc(s.url)}</div></div><div><button class="primary" onclick="window.open('${esc(s.url)}','_blank','noopener,noreferrer')">Abrir</button><button class="danger" onclick="removeSaved('${s.id}')">Remover</button></div></div>`).join(''):'<div class="empty">Você ainda não salvou links.</div>'}
 async function removeSaved(id){const{error}=await db.from('links_salvos').delete().eq('id',id).eq('user_id',currentUser.id);if(error){alert(error.message);return}await loadSaved()}
