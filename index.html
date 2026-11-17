@@ -119,7 +119,7 @@ function displaySharedVideo(url){
 async function loadSharedVideo(){
   if(!hasActiveMembership){showVideoPlaceholder('O vídeo é exclusivo para assinantes com plano ativo.');return}
   const{data,error}=await db.storage.from(VIDEO_BUCKET).createSignedUrl(VIDEO_PATH,86400);
-  if(error){showVideoPlaceholder('O vídeo ainda não foi publicado pelo administrador.');if(isAdmin)message('videoMessage','Ainda não há vídeo publicado. Se já publicou, confira as permissões do armazenamento.','');return}
+  if(error){showVideoPlaceholder('O vídeo ainda não foi publicado pelo administrador.');if(isAdmin)message('videoMessage','Não foi possível localizar o vídeo: '+error.message,'');return}
   displaySharedVideo(data.signedUrl);
   if(isAdmin)message('videoMessage','Vídeo publicado e disponível para os assinantes ativos.','ok');
 }
@@ -128,12 +128,20 @@ async function loadVideo(){
   const file=$('videoFile').files[0];
   if(!file){message('videoMessage','Escolha primeiro o vídeo no seu celular.','error');return}
   if(!file.type.startsWith('video/')){message('videoMessage','Selecione um arquivo de vídeo.','error');return}
-  message('videoMessage','Enviando vídeo para o armazenamento online. Aguarde...','');
-  const{error}=await db.storage.from(VIDEO_BUCKET).upload(VIDEO_PATH,file,{upsert:true,contentType:file.type,cacheControl:'3600'});
-  if(error){message('videoMessage','Não foi possível salvar o vídeo: '+error.message,'error');return}
-  $('videoFile').value='';
-  await loadSharedVideo();
-  message('videoMessage','Vídeo salvo com sucesso! Os assinantes ativos poderão assistir ao acessar o Radar.','ok');
+  message('videoMessage','Enviando vídeo para o armazenamento online. Não feche esta página.','');
+  try {
+    const result = await db.storage.from(VIDEO_BUCKET).upload(VIDEO_PATH,file,{upsert:true,contentType:file.type || 'video/mp4',cacheControl:'3600'});
+    if(result.error){
+      const extra = result.error.statusCode ? ' (código '+result.error.statusCode+')' : '';
+      message('videoMessage','Não foi possível salvar o vídeo: '+result.error.message+extra,'error');
+      return;
+    }
+    $('videoFile').value='';
+    await loadSharedVideo();
+    message('videoMessage','Vídeo salvo com sucesso! Os assinantes ativos poderão assistir ao acessar o Radar.','ok');
+  } catch(err) {
+    message('videoMessage','Falha no envio: '+(err?.message || String(err)),'error');
+  }
 }
 async function removeVideo(){
   if(!isAdmin){message('videoMessage','Somente o administrador pode remover o vídeo.','error');return}
