@@ -1,0 +1,14 @@
+RADAR GEESPORTESRÚSTICO — arquivos PWA
+
+Envie estes 4 arquivos para a mesma pasta onde está o index.html no GitHub:
+- manifest.json
+- sw.js
+- icon-192.png
+- icon-512.png
+
+Depois, faça as 3 alterações no index.html indicadas na conversa:
+1) adicionar o link do manifest no <head>;
+2) adicionar os botões Instalar e Compartilhar no cabeçalho;
+3) adicionar o script de instalação/compartilhamento e registro do service worker antes de </body>.
+
+O site precisa estar publicado em HTTPS (GitHub Pages já fornece HTTPS).
