@@ -9,17 +9,17 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-:root{--navy:#071a35;--blue:#087cf5;--orange:#ffb323;--bg:#061329;--ink:#f3f8ff;--muted:#b8c9df;--line:#174b7c;--green:#00d68f}
+:root{--navy:#071a35;--blue:#087cf5;--orange:#ff8b24;--pink:#f52983;--bg:#061329;--ink:#f3f8ff;--muted:#b8c9df;--line:#174b7c;--green:#00d68f}
 *{box-sizing:border-box}
 html{background:#061329}
 body{margin:0!important;color:#f3f8ff!important;background:radial-gradient(ellipse at 50% -15%,#123c72 0,#071a35 42%,#040d1d 100%)!important;font-family:Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif!important}
 button,input,select,textarea{font:inherit}
 button{cursor:pointer;border:0;border-radius:12px;padding:11px 14px;font-weight:850;transition:transform .18s,box-shadow .18s,filter .18s}
 button:hover{transform:translateY(-2px);filter:brightness(1.08)}
-.primary{background:linear-gradient(135deg,#087cff,#004bd6);color:#fff;border:1px solid #41caff;box-shadow:0 5px 18px #007bff55}
+.primary{background:linear-gradient(135deg,#ff8b24,#f52983);color:#fff;border:1px solid #ffb35c;box-shadow:0 5px 18px #f5298355}
 .dark{background:linear-gradient(135deg,#123a68,#071a35);color:#fff;border:1px solid #2789c9}
 .soft{background:linear-gradient(135deg,#123b68,#0b2a4d);color:#d9f3ff;border:1px solid #3986bb}
-.orange{background:linear-gradient(135deg,#ffd05a,#ff9f0a);color:#231400;border:1px solid #ffe08a}
+.orange{background:linear-gradient(135deg,#ff9c28,#f52983);color:#fff;border:1px solid #ffb35c}
 .danger{background:#3b1420;color:#ffb9c0;border:1px solid #ff5268}
 .muted{color:var(--muted)}
 header{background:linear-gradient(115deg,#041126,#092a55 58%,#06417b);border-bottom:1px solid #12bfff66;padding:19px 16px 22px;box-shadow:0 8px 32px #00aaff20}
@@ -50,7 +50,7 @@ main{max-width:1200px;margin:22px auto;padding:0 14px}
 .stat small{color:#c4d7ed;font-weight:700}
 .tabs{display:flex;gap:9px;overflow-x:auto;padding:8px 2px 15px;scrollbar-width:thin}
 .tabs button{flex:0 0 auto;white-space:nowrap;background:linear-gradient(145deg,#0d2c50,#071a34);color:#e8f4ff;border:1px solid #087ac4;border-radius:14px;padding:13px 17px}
-.tabs button.active{background:linear-gradient(135deg,#087cff,#004bd6);color:#fff;border-color:#31d5ff;box-shadow:0 0 18px #008cff66}
+.tabs button.active{background:linear-gradient(135deg,#ff8b24,#f52983);color:#fff;border-color:#ffb35c;box-shadow:0 0 18px #f5298355}
 .section{display:none}
 .section.active{display:block}
 .panel,.plan{background:linear-gradient(145deg,#0b2545,#07182f);color:#edf6ff;border:1px solid #1c5482;border-radius:17px;padding:18px;margin:10px 0;box-shadow:0 8px 24px #0003}
@@ -85,6 +85,31 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#19bfff;box-sh
 .statusline{font-size:13px;margin-top:8px;line-height:1.4}
 .statusline.error{color:#ff9da8}
 .statusline.ok{color:#62efb2}
+
+/* NOVA APRESENTAÇÃO DO RADAR */
+.demand-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.demand-heading h2{margin:0}
+.demand-subtitle{color:#b8c9df;font-size:13px;line-height:1.5}
+.category-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:15px 0}
+.category-card{background:linear-gradient(145deg,#173b60,#0b203a);border:1px solid #32668e;border-radius:14px;padding:13px;text-align:center;min-width:0}
+.category-card strong{display:block;font-size:15px;color:white}
+.category-card span{display:block;font-size:11px;color:#b8c9df;margin-top:5px}
+.category-card.best{border:1px solid #ff9c35;background:linear-gradient(145deg,#633a1b,#281d2a)}
+.category-card.best strong{color:#ffbd68}
+.recommendation{border:1px solid #b66c32;background:linear-gradient(135deg,#182e48,#251d2c);border-radius:15px;padding:14px;margin:12px 0}
+.recommendation h3{margin:0 0 7px}
+.recommendation .highlight{color:#ffb35c;font-weight:900}
+.recommendation-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.recommendation-item{background:#071a31;border:1px solid #315678;border-radius:13px;padding:10px;min-width:0}
+.recommendation-item img{width:100%;height:115px;object-fit:contain;background:#061329;border-radius:9px}
+.recommendation-item strong{display:block;font-size:13px;margin:8px 0;line-height:1.35}
+.recommendation-item small{color:#00d68f;font-weight:800}
+.section-label{font-size:17px;font-weight:950;margin:16px 0 9px}
+.rank-row{margin:12px 0}
+.rank-label{display:flex;justify-content:space-between;gap:8px;font-size:13px;font-weight:800;margin-bottom:5px}
+.rank-track{height:9px;background:#071426;border-radius:20px;overflow:hidden}
+.rank-fill{height:100%;background:linear-gradient(90deg,#ff9b27,#f52983);border-radius:20px}
+.week-label{color:#ffbd68;font-weight:900}
 @media(max-width:760px){
 .head{align-items:flex-start;flex-direction:column}
 header .row{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -94,6 +119,8 @@ header button{font-size:12px;padding:11px 8px}
 .filters{grid-template-columns:1fr 1fr}
 .products{grid-template-columns:1fr}
 .plans{grid-template-columns:1fr 1fr}
+.category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.recommendation-list{grid-template-columns:1fr}
 }
 @media(max-width:420px){
 main{padding:0 11px}
@@ -170,13 +197,13 @@ main{padding:0 11px}
 <div class="stat"><strong id="countProducts">0</strong><small>Produtos encontrados</small></div>
 <div class="stat"><strong id="countHigh">0</strong><small>Comissão acima de R$ 20</small></div>
 <div class="stat"><strong id="countLow">0</strong><small>Baixa concorrência informada</small></div>
-<div class="stat"><strong id="countChampions">0</strong><small>PRODUTOS CAMPEÃO</small></div>
+<div class="stat"><strong id="countChampions">0</strong><small>O QUE MAIS VENDE</small></div>
 </section>
 
 <nav class="tabs">
 <button class="active" data-tab="radar" onclick="showTab('radar')">🔎 Radar</button>
-<button data-tab="mais" onclick="showTab('mais')">🏆 Mais vendidos</button>
-<button data-tab="tendencias" onclick="showTab('tendencias')">📈 Em alta</button>
+<button data-tab="mais" onclick="showTab('mais')">🏆 O que mais vende</button>
+<button data-tab="tendencias" onclick="showTab('tendencias')">🔥 Melhor pra postar nesta semana</button>
 <button data-tab="salvos" onclick="showTab('salvos')">⭐ Meus links</button>
 <button data-tab="video" onclick="showTab('video')">🎥 Minhas dicas</button>
 <button data-tab="planos" onclick="showTab('planos')">💳 Assinaturas</button>
@@ -184,12 +211,37 @@ main{padding:0 11px}
 </nav>
 
 <section id="radar" class="section active">
+
+<div class="panel">
+<div class="demand-heading">
+<h2>🏆 O que mais vende</h2>
+<span class="pill hot">RADAR DE DEMANDA</span>
+</div>
+<p class="demand-subtitle">Confira as categorias e produtos com mais vendas informadas no Radar. Os resultados são organizados com base nos dados disponíveis.</p>
+<div id="categoryOverview" class="category-grid"></div>
+<div class="recommendation">
+<h3>🔥 Destaque de vendas</h3>
+<div id="categoryHighlight" class="muted">Carregando informações dos produtos...</div>
+</div>
+<div class="section-label">Categorias com produtos cadastrados</div>
+<div id="categoryRanking"></div>
+</div>
+
+<div class="panel">
+<div class="demand-heading">
+<h2>🔥 Melhor pra postar nesta semana</h2>
+<span class="pill good">IDEIAS DE POSTAGEM</span>
+</div>
+<p class="demand-subtitle">Produtos com vendas informadas e boas oportunidades para divulgar. Confira os resultados antes de escolher o que postar.</p>
+<div id="weeklyRecommendations" class="recommendation-list"></div>
+</div>
+
 <div class="panel">
 <h2>Buscar oportunidades</h2>
 <p class="muted">Digite o nome do produto e clique em Buscar na Shopee para consultar as ofertas disponíveis.</p>
 
 <div class="filters">
-<input id="q" placeholder="Ex.: caixa de som, ferramentas, celular" oninput="renderProducts()">
+<input id="q" placeholder="Ex.: comedouro pet, vestido, panela" oninput="renderProducts()">
 <select id="commission" onchange="renderProducts()">
 <option value="all">Todas as comissões</option>
 <option value="20">Acima de R$ 20</option>
@@ -200,10 +252,18 @@ main{padding:0 11px}
 </select>
 <select id="category" onchange="renderProducts()">
 <option value="all">Todas categorias</option>
+<option>Pet</option>
+<option>Cozinha</option>
+<option>Moda</option>
+<option>Acessórios</option>
 <option>Casa</option>
+<option>Tech</option>
+<option>Infantil</option>
+<option>Fitness</option>
+<option>Saúde</option>
+<option>Beleza</option>
 <option>Eletrônicos</option>
 <option>Esportes</option>
-<option>Beleza</option>
 <option>Outros</option>
 <option>Shopee</option>
 </select>
@@ -222,16 +282,16 @@ main{padding:0 11px}
 
 <section id="mais" class="section">
 <div class="panel">
-<h2>Produtos mais vendidos</h2>
-<p class="muted">Ordenados pelo volume de vendas informado ou retornado pela fonte.</p>
+<h2>🏆 O que mais vende</h2>
+<p class="muted">Produtos organizados pelo volume de vendas informado ou retornado pela fonte.</p>
 <div id="bestList" class="products"></div>
 </div>
 </section>
 
 <section id="tendencias" class="section">
 <div class="panel">
-<h2>Produtos em alta</h2>
-<p class="muted">Produtos marcados como “Em alta” no cadastro.</p>
+<h2>🔥 Melhor pra postar nesta semana</h2>
+<p class="muted">Sugestões organizadas a partir das vendas e das tendências informadas nos produtos.</p>
 <div id="trendList" class="products"></div>
 </div>
 </section>
@@ -285,12 +345,14 @@ main{padding:0 11px}
 <input type="hidden" id="editId">
 <div class="formgrid">
 <label>Nome do produto<input required id="pname"></label>
-<label>Categoria<select id="pcat"><option>Casa</option><option>Eletrônicos</option><option>Esportes</option><option>Beleza</option><option>Outros</option></select></label>
+<label>Categoria<select id="pcat">
+<option>Pet</option><option>Cozinha</option><option>Moda</option><option>Acessórios</option><option>Casa</option><option>Tech</option><option>Infantil</option><option>Fitness</option><option>Saúde</option><option>Eletrônicos</option><option>Esportes</option><option>Beleza</option><option>Outros</option>
+</select></label>
 <label>Descrição<input id="pdesc"></label>
 <label>Preço (R$)<input type="number" min="0" step="0.01" id="pprice"></label>
 <label>Comissão (R$)<input required type="number" min="0" step="0.01" id="pcommission"></label>
 <label>Vendas informadas<input type="number" min="0" id="psales"></label>
-<label>Afiliados divulgando<input type="number" min="0" id="paffiliates"></label>
+<label>Concorrência estimada (nº de afiliados)<input type="number" min="0" id="paffiliates"></label>
 <label>Tendência<select id="ptrend"><option>Sem informação</option><option>Em alta</option><option>Estável</option><option>Em queda</option></select></label>
 <label class="wide">URL da imagem<input type="url" id="pimage" placeholder="https://..."></label>
 <label class="wide">Link do produto<input type="url" id="plink" placeholder="https://..."></label>
@@ -323,9 +385,6 @@ const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 let currentUser=null;
 let isAdmin=false;
 let hasActiveMembership=false;
-
-/* Produtos manuais e produtos da Shopee ficam separados.
-   Isso evita tentar gravar IDs da Shopee na tabela produtos. */
 let products=[];
 let manualProducts=[];
 let shopeeProducts=[];
@@ -478,14 +537,11 @@ async function searchShopee(){
   message('searchMessage','Entre na sua conta para pesquisar.','error');
   return;
  }
-
  if(!hasActiveMembership){
   message('searchMessage','Seu plano ainda não está ativo. Aguarde a liberação do administrador.','error');
   return;
  }
-
  const keyword=$('q').value.trim();
-
  if(!keyword){
   message('searchMessage','Digite o nome de um produto antes de pesquisar.','error');
   $('q').focus();
@@ -499,20 +555,14 @@ async function searchShopee(){
 
  try{
   const{data,error}=await db.functions.invoke('radar-shopee',{
-   body:{
-    keyword:keyword,
-    page:1,
-    limit:20
-   }
+   body:{keyword:keyword,page:1,limit:20}
   });
-
   if(error){
    console.error('Erro na Edge Function:',error);
    throw new Error(error.message||'Não foi possível consultar a Shopee.');
   }
 
   const resultList=data?.products||data?.data?.products||[];
-
   if(!Array.isArray(resultList)){
    throw new Error('A resposta da integração não veio no formato esperado.');
   }
@@ -560,7 +610,6 @@ async function searchShopee(){
   }else{
    message('searchMessage','A Shopee não retornou produtos para essa pesquisa. Tente outra palavra-chave.','');
   }
-
  }catch(err){
   console.error(err);
   message('searchMessage','Erro na busca: '+(err?.message||String(err)),'error');
@@ -577,7 +626,6 @@ async function loadSaved(){
   .select('*')
   .eq('user_id',currentUser.id)
   .order('criado_em',{ascending:false});
-
  if(error){
   message('appMessage','Erro ao carregar seus links: '+error.message,'error');
   saved=[];
@@ -593,7 +641,7 @@ function updateStats(){
  $('countProducts').textContent=products.length;
  $('countHigh').textContent=products.filter(p=>Number(p.comissao)>20).length;
  $('countLow').textContent=products.filter(p=>p.concorrencia!==null&&p.concorrencia!==''&&Number(p.concorrencia)<=3).length;
- $('countChampions').textContent=products.filter(p=>Number(p.comissao)>20&&p.concorrencia!==null&&p.concorrencia!==''&&Number(p.concorrencia)<=3).length;
+ $('countChampions').textContent=products.filter(p=>Number(p.vendas)>0).length;
 }
 
 /* CARTÃO DO PRODUTO */
@@ -611,15 +659,15 @@ function productCard(p){
  <h3>${esc(p.nome)}</h3>
  ${p.descricao?`<p class="muted">${esc(p.descricao)}</p>`:''}
  <div class="metrics">
-  <div><b>VENDIDO ${p.vendas==null?'—':Number(p.vendas).toLocaleString('pt-BR')}</b><small>Quantidade vendida</small></div>
-  <div><b>AFILIADOS ${p.concorrencia==null?'—':esc(p.concorrencia)}</b><small>Concorrência informada</small></div>
+  <div><b>${p.vendas==null?'—':Number(p.vendas).toLocaleString('pt-BR')}</b><small>Vendas informadas</small></div>
+  <div><b>${p.concorrencia==null?'—':esc(p.concorrencia)}</b><small>Concorrência informada</small></div>
   <div><b>${money(p.comissao)}</b><small>Comissão em valor</small></div>
  </div>
  ${p.taxaComissao!==null&&p.taxaComissao!==undefined&&p.taxaComissao!==''?`<span class="pill good">TAXA INFORMADA: ${esc(p.taxaComissao)}%</span>`:''}
  ${p.avaliacao!==null&&p.avaliacao!==undefined?`<span class="pill">AVALIAÇÃO: ${esc(p.avaliacao)}</span>`:''}
  ${!isShopee?`
  <span class="pill ${Number(p.comissao)>20?'good':''}">${Number(p.comissao)>20?'COMISSÃO ACIMA DE R$ 20':'COMISSÃO ATÉ R$ 20'}</span>
- <span class="pill ${baixaConcorrencia?'good':''}">${baixaConcorrencia?'POUCOS AFILIADOS DIVULGANDO':'CONCORRÊNCIA ALTA OU NÃO INFORMADA'}</span>
+ <span class="pill ${baixaConcorrencia?'good':''}">${baixaConcorrencia?'BAIXA CONCORRÊNCIA':'CONCORRÊNCIA ALTA OU NÃO INFORMADA'}</span>
  <span class="pill">${esc(p.tendencia||'Sem informação')}</span>
  `:''}
  <div class="actions">
@@ -628,6 +676,57 @@ function productCard(p){
  <button class="soft" onclick="shareProduct('${p.id}')">📤 Compartilhar</button>
  </div>
  </article>`;
+}
+
+/* PAINEL DE CATEGORIAS E DESTAQUES */
+function renderDemandRadar(){
+ const categories=['Pet','Cozinha','Moda','Acessórios','Casa','Tech','Infantil','Fitness','Saúde','Beleza'];
+ const counts=categories.map(name=>{
+  const items=products.filter(p=>(p.categoria||'').toLowerCase()===name.toLowerCase());
+  const sales=items.reduce((sum,p)=>sum+(Number(p.vendas)||0),0);
+  return{name,items:items.length,sales};
+ });
+
+ const populated=counts.filter(c=>c.items>0);
+ const ordered=[...populated].sort((a,b)=>b.sales-a.sales||b.items-a.items);
+
+ $('categoryOverview').innerHTML=ordered.length
+  ?ordered.slice(0,4).map((c,i)=>`
+   <div class="category-card ${i===0?'best':''}">
+    <strong>${i===0?'🔥 ':''}${esc(c.name)}</strong>
+    <span>${c.sales>0?c.sales.toLocaleString('pt-BR')+' vendas informadas':c.items+' produto(s) cadastrado(s)'}</span>
+   </div>`).join('')
+  :'<div class="empty" style="grid-column:1/-1">As categorias aparecerão aqui quando houver produtos cadastrados.</div>';
+
+ const winner=ordered[0];
+ $('categoryHighlight').innerHTML=winner
+  ?`<span class="highlight">${esc(winner.name)}</span> é a categoria com maior volume de vendas informado entre os produtos cadastrados. <b>${winner.sales.toLocaleString('pt-BR')}</b> vendas informadas em <b>${winner.items}</b> produto(s).`
+  :'Cadastre produtos com categoria e quantidade de vendas para identificar os destaques.';
+
+ const maxSales=Math.max(1,...ordered.map(c=>c.sales));
+ $('categoryRanking').innerHTML=ordered.length
+  ?ordered.map(c=>`
+   <div class="rank-row">
+    <div class="rank-label"><span>${esc(c.name)}</span><span>${c.sales>0?c.sales.toLocaleString('pt-BR')+' vendas':c.items+' produto(s)'}</span></div>
+    <div class="rank-track"><div class="rank-fill" style="width:${c.sales>0?Math.max(4,c.sales/maxSales*100):Math.max(4,c.items/Math.max(1,...ordered.map(x=>x.items))*100)}%"></div></div>
+   </div>`).join('')
+  :'<div class="empty">Nenhuma categoria possui produtos cadastrados ainda.</div>';
+
+ const recommendations=[...products]
+  .filter(p=>Number(p.vendas)>0)
+  .sort((a,b)=>(Number(b.vendas)||0)-(Number(a.vendas)||0))
+  .slice(0,3);
+
+ $('weeklyRecommendations').innerHTML=recommendations.length
+  ?recommendations.map((p,i)=>`
+   <div class="recommendation-item">
+    ${p.imagem_url?`<img src="${esc(p.imagem_url)}" alt="${esc(p.nome)}" loading="lazy">`:''}
+    <span class="pill hot">#${i+1} DESTAQUE</span>
+    <strong>${esc(p.nome)}</strong>
+    <small>🔥 ${Number(p.vendas).toLocaleString('pt-BR')} vendas informadas</small>
+    <div style="margin-top:9px"><button class="primary" onclick="openLink('${String(p.id).replace(/'/g,"\\'")}')">Ver produto</button></div>
+   </div>`).join('')
+  :'<div class="empty" style="grid-column:1/-1">Ainda não há produtos com vendas informadas para recomendar. Faça uma busca na Shopee ou cadastre produtos com dados de vendas.</div>';
 }
 
 /* FILTROS E EXIBIÇÃO */
@@ -647,14 +746,17 @@ function renderProducts(){
  $('productList').innerHTML=list.length?list.map(productCard).join(''):'<div class="empty">Nenhum produto encontrado. Digite uma palavra e clique em Buscar na Shopee.</div>';
  renderOther();
  updateStats();
+ renderDemandRadar();
 }
 
 function renderOther(){
  const best=[...products].sort((a,b)=>(Number(b.vendas)||0)-(Number(a.vendas)||0));
  $('bestList').innerHTML=best.length?best.map(productCard).join(''):'<div class="empty">Nenhum produto cadastrado.</div>';
 
- const trends=products.filter(p=>p.tendencia==='Em alta');
- $('trendList').innerHTML=trends.length?trends.map(productCard).join(''):'<div class="empty">Nenhum produto marcado como em alta.</div>';
+ const trends=products.filter(p=>p.tendencia==='Em alta'||Number(p.vendas)>0)
+  .sort((a,b)=>(Number(b.vendas)||0)-(Number(a.vendas)||0));
+
+ $('trendList').innerHTML=trends.length?trends.map(productCard).join(''):'<div class="empty">Ainda não há produtos com vendas ou tendência informada para recomendar.</div>';
 
  if(isAdmin){
   $('adminList').innerHTML=manualProducts.map(p=>`
@@ -695,33 +797,18 @@ function showTab(id){
 async function toggleSave(id){
  const p=manualProducts.find(x=>String(x.id)===String(id));
  if(!p||!currentUser)return;
-
  const old=saved.find(s=>String(s.produto_id)===String(id));
-
  if(old){
   const{error}=await db.from('links_salvos').delete().eq('id',old.id).eq('user_id',currentUser.id);
-  if(error){
-   alert('Não foi possível remover: '+error.message);
-   return;
-  }
+  if(error){alert('Não foi possível remover: '+error.message);return;}
  }else{
   const url=p.link_afiliado||p.link_produto;
-  if(!url){
-   alert('Este produto ainda não tem link cadastrado.');
-   return;
-  }
+  if(!url){alert('Este produto ainda não tem link cadastrado.');return;}
   const{error}=await db.from('links_salvos').insert({
-   user_id:currentUser.id,
-   produto_id:p.id,
-   titulo:p.nome,
-   url:url
+   user_id:currentUser.id,produto_id:p.id,titulo:p.nome,url:url
   });
-  if(error){
-   alert('Não foi possível salvar: '+error.message);
-   return;
-  }
+  if(error){alert('Não foi possível salvar: '+error.message);return;}
  }
-
  await loadSaved();
  renderProducts();
 }
@@ -774,6 +861,7 @@ function openLink(id){
  const p=products.find(x=>String(x.id)===String(id));
  const url=p&&(p.link_afiliado||p.link_produto);
  if(url)window.open(url,'_blank','noopener,noreferrer');
+ else alert('Este produto ainda não possui link cadastrado.');
 }
 
 /* LISTA DE LINKS SALVOS */
@@ -794,10 +882,7 @@ function renderSaved(){
 
 async function removeSaved(id){
  const{error}=await db.from('links_salvos').delete().eq('id',id).eq('user_id',currentUser.id);
- if(error){
-  alert(error.message);
-  return;
- }
+ if(error){alert(error.message);return;}
  await loadSaved();
 }
 
@@ -810,7 +895,6 @@ function clearProductForm(){
 function editProduct(id){
  const p=manualProducts.find(x=>String(x.id)===String(id));
  if(!p)return;
-
  $('editId').value=p.id;
  $('pname').value=p.nome||'';
  $('pcat').value=p.categoria||'Outros';
@@ -823,16 +907,12 @@ function editProduct(id){
  $('pimage').value=p.imagem_url||'';
  $('plink').value=p.link_produto||'';
  $('paffiliate').value=p.link_afiliado||'';
-
  window.scrollTo({top:$('productForm').offsetTop-100,behavior:'smooth'});
 }
 
 async function saveProduct(e){
  e.preventDefault();
- if(!isAdmin){
-  alert('Acesso restrito ao administrador.');
-  return;
- }
+ if(!isAdmin){alert('Acesso restrito ao administrador.');return;}
 
  const v={
   nome:$('pname').value.trim(),
@@ -851,12 +931,7 @@ async function saveProduct(e){
 
  const id=$('editId').value;
  const result=id?await db.from('produtos').update(v).eq('id',id):await db.from('produtos').insert(v);
-
- if(result.error){
-  alert('Erro ao salvar produto: '+result.error.message);
-  return;
- }
-
+ if(result.error){alert('Erro ao salvar produto: '+result.error.message);return;}
  alert('Produto salvo no banco de dados!');
  clearProductForm();
  await loadProducts();
@@ -865,10 +940,7 @@ async function saveProduct(e){
 async function deleteProduct(id){
  if(!isAdmin||!confirm('Excluir este produto?'))return;
  const{error}=await db.from('produtos').delete().eq('id',id);
- if(error){
-  alert('Erro ao excluir: '+error.message);
-  return;
- }
+ if(error){alert('Erro ao excluir: '+error.message);return;}
  await loadProducts();
  await loadSaved();
 }
@@ -885,7 +957,6 @@ async function loadAdminRequests(){
  const{data,error}=await db.from('assinantes')
   .select('user_id,email,plano,status,criado_em')
   .order('criado_em',{ascending:false});
-
  $('adminRequests').innerHTML=error?('Erro: '+esc(error.message)):(data||[]).map(a=>`
   <div style="border-bottom:1px solid var(--line);padding:9px 0">
    <b>${esc(a.email)}</b>
@@ -901,10 +972,7 @@ async function loadAdminRequests(){
 async function setMember(id,status){
  if(!isAdmin)return;
  const{error}=await db.from('assinantes').update({status}).eq('user_id',id);
- if(error){
-  alert('Erro: '+error.message);
-  return;
- }
+ if(error){alert('Erro: '+error.message);return;}
  await loadAdminRequests();
  alert('Status atualizado. A ativação de cobrança ainda é manual.');
 }
@@ -934,72 +1002,44 @@ async function loadSharedVideo(){
   showVideoPlaceholder('O vídeo é exclusivo para assinantes com plano ativo.');
   return;
  }
-
  const{data,error}=await db.storage.from(VIDEO_BUCKET).createSignedUrl(VIDEO_PATH,86400);
-
  if(error){
   showVideoPlaceholder('O vídeo ainda não foi publicado pelo administrador.');
   if(isAdmin)message('videoMessage','Não foi possível localizar o vídeo: '+error.message,'');
   return;
  }
-
  displaySharedVideo(data.signedUrl);
  if(isAdmin)message('videoMessage','Vídeo publicado e disponível para os assinantes ativos.','ok');
 }
 
 async function loadVideo(){
- if(!isAdmin){
-  message('videoMessage','Somente o administrador pode publicar ou substituir o vídeo.','error');
-  return;
- }
-
+ if(!isAdmin){message('videoMessage','Somente o administrador pode publicar ou substituir o vídeo.','error');return;}
  const file=$('videoFile').files[0];
- if(!file){
-  message('videoMessage','Escolha primeiro o vídeo.','error');
-  return;
- }
- if(!file.type.startsWith('video/')){
-  message('videoMessage','Selecione um arquivo de vídeo.','error');
-  return;
- }
-
+ if(!file){message('videoMessage','Escolha primeiro o vídeo.','error');return;}
+ if(!file.type.startsWith('video/')){message('videoMessage','Selecione um arquivo de vídeo.','error');return;}
  message('videoMessage','Enviando vídeo para o armazenamento online. Não feche esta página.');
-
  try{
   const result=await db.storage.from(VIDEO_BUCKET).upload(VIDEO_PATH,file,{
-   upsert:true,
-   contentType:file.type||'video/mp4',
-   cacheControl:'3600'
+   upsert:true,contentType:file.type||'video/mp4',cacheControl:'3600'
   });
-
   if(result.error){
    const extra=result.error.statusCode?' (código '+result.error.statusCode+')':'';
    message('videoMessage','Não foi possível salvar o vídeo: '+result.error.message+extra,'error');
    return;
   }
-
   $('videoFile').value='';
   await loadSharedVideo();
   message('videoMessage','Vídeo salvo com sucesso! Os assinantes ativos poderão assistir ao acessar o Radar.','ok');
-
  }catch(err){
   message('videoMessage','Falha no envio: '+(err?.message||String(err)),'error');
  }
 }
 
 async function removeVideo(){
- if(!isAdmin){
-  message('videoMessage','Somente o administrador pode remover o vídeo.','error');
-  return;
- }
+ if(!isAdmin){message('videoMessage','Somente o administrador pode remover o vídeo.','error');return;}
  if(!confirm('Tem certeza de que deseja remover o vídeo para todos os assinantes?'))return;
-
  const{error}=await db.storage.from(VIDEO_BUCKET).remove([VIDEO_PATH]);
- if(error){
-  message('videoMessage','Não foi possível remover o vídeo: '+error.message,'error');
-  return;
- }
-
+ if(error){message('videoMessage','Não foi possível remover o vídeo: '+error.message,'error');return;}
  showVideoPlaceholder('O administrador ainda não publicou um vídeo.');
  message('videoMessage','Vídeo removido do armazenamento.','ok');
  $('videoFile').value='';
