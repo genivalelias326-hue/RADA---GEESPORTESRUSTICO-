@@ -1,12 +1,12 @@
 
-const CACHE_NAME = "radar-ge-v3";
+const CACHE_NAME = "radar-ge-v4";
 
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./icon-192.png",
-  "./icon-512.png"
+  "./ícone-192.png",
+  "./ícone-512.png"
 ];
 
 self.addEventListener("install", event => {
