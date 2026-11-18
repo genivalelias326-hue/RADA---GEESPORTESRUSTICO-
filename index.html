@@ -287,10 +287,10 @@ main{padding:0 11px}
 <h2>Planos de acesso</h2>  
 <p class="muted">A seleção abaixo registra seu interesse. Nenhum pagamento é processado nesta versão.</p>  
 <div class="plans">  
-<div class="plan"><span class="pill good">Teste grátis</span><h3>7 dias</h3><div class="price">R$ 0</div><p>Período experimental de 7 dias.</p><button class="soft" onclick="requestPlan('Teste grátis - 7 dias')">Solicitar teste</button></div>  
-<div class="plan"><h3>Mensal</h3><div class="price">R$ 30</div><p>Acesso por mês.</p><button class="primary" onclick="requestPlan('Mensal - R$ 30/mês')">Escolher mensal</button></div>  
-<div class="plan featured"><span class="pill hot">Plano anual</span><h3>Anual</h3><div class="price">R$ 330</div><p>Acesso por 12 meses.</p><button class="orange" onclick="requestPlan('Anual - R$ 330/ano')">Escolher anual</button></div>  
-<div class="plan"><span class="pill good">Pagamento único</span><h3>Vitalício</h3><div class="price">R$ 850</div><p>Pagamento único, conforme os termos do serviço.</p><button class="dark" onclick="requestPlan('Vitalício - R$ 850')">Escolher vitalício</button></div>  
+<div class="plan"><span class="pill good">Teste grátis</span><h3>7 dias</h3><div class="price">R$ 0</div><p>Período experimental de 7 dias.</p><button class="soft" onclick="requestPlan('teste_gratis')">Solicitar teste</button></div>  
+<div class="plan"><h3>Mensal</h3><div class="price">R$ 30</div><p>Acesso por mês.</p><button class="primary" onclick="requestPlan('mensal')">Escolher mensal</button></div>  
+<div class="plan featured"><span class="pill hot">Plano anual</span><h3>Anual</h3><div class="price">R$ 330</div><p>Acesso por 12 meses.</p><button class="orange" onclick="requestPlan('anual')">Escolher anual</button></div>  
+<div class="plan"><span class="pill good">Pagamento único</span><h3>Vitalício</h3><div class="price">R$ 850</div><p>Pagamento único, conforme os termos do serviço.</p><button class="dark" onclick="requestPlan('vitalicio')">Escolher vitalício</button></div>  
 </div>  
 <div id="planStatus" class="notice" style="display:none"></div>  
 </div>  
@@ -328,7 +328,7 @@ main{padding:0 11px}
 <div class="panel"><h2>Gerenciar produtos</h2><div id="adminList"></div></div>  
 <div class="panel">  
 <h2>Solicitações de plano</h2>  
-<p class="muted">A ativação e a cobrança ainda são manuais. A integração com pagamento será feita em uma etapa posterior.</p>  
+<p class="muted">Pagamentos aprovados são registrados em radar_assinaturas. A lista administrativa abaixo continua exibindo os cadastros legados da tabela assinantes.</p>  
 <div id="adminRequests"></div>  
 </div>  
 </section>  
@@ -591,18 +591,27 @@ async function loadSession(){
  $('adminTab').classList.toggle('hidden',!isAdmin);  
  $('videoAdminControls').classList.toggle('hidden',!isAdmin);  
   
- const{data:member,error:mErr}=await db.from('assinantes')  
+  const{data:paidMember,error:paidErr}=await db.from('radar_assinaturas')
+   .select('plano,status,fim_periodo')
+   .eq('user_id',currentUser.id)
+   .maybeSingle();
+
+  const paidIsCurrent=!!paidMember&&paidMember.status==='active'&&
+   (!paidMember.fim_periodo||new Date(paidMember.fim_periodo).getTime()>Date.now());
+
+  const{data:member,error:mErr}=await db.from('assinantes')  
   .select('plano,status,data_expiracao')  
   .eq('user_id',currentUser.id)  
   .maybeSingle();  
   
- hasActiveMembership=isAdmin||(!mErr&&!!member&&member.status==='ativo');  
+  hasActiveMembership=isAdmin||paidIsCurrent||(!mErr&&!!member&&member.status==='ativo');  
   
  if(mErr){  
   message('appMessage','Não foi possível consultar seu plano: '+mErr.message,'error');  
  }else{  
-  $('membership').textContent=member?('Plano: '+member.plano+' • Status: '+member.status):'Cadastro de assinante ainda não localizado';  
-  if(!isAdmin&&(!member||member.status!=='ativo')){  
+   const accessMember=paidIsCurrent?paidMember:member;
+   $('membership').textContent=accessMember?('Plano: '+accessMember.plano+' • Status: '+accessMember.status):'Cadastro de assinante ainda não localizado';  
+   if(!isAdmin&&!hasActiveMembership){  
    message('appMessage','Seu cadastro está aguardando liberação do administrador. Você poderá acessar os produtos quando seu plano estiver ativo.','error');  
   }else{  
    message('appMessage','Acesso liberado. Você já pode pesquisar oportunidades.','ok');  
@@ -1200,10 +1209,38 @@ async function deleteProduct(id){
 }  
   
 /* PLANOS */  
-async function requestPlan(plan){  
- $('planStatus').style.display='block';  
- $('planStatus').textContent='Você selecionou '+plan+'. A solicitação e a cobrança ainda não são enviadas automaticamente. Entre em contato com o administrador para ativação.';  
-}  
+async function requestPlan(plan){
+ const status=$('planStatus');
+ status.style.display='block';
+ if(plan==='teste_gratis'){
+  status.textContent='O teste grátis de 7 dias ainda não pode ser ativado automaticamente: a função rapid-endpoint enviada não implementa esse plano. Peça a ativação ao administrador.';
+  return;
+ }
+ if(!currentUser){
+  status.textContent='Entre ou crie sua conta antes de continuar para o checkout.';
+  $('authPanel').classList.remove('hidden');
+  $('authPanel').scrollIntoView({behavior:'smooth',block:'start'});
+  return;
+ }
+ const billingChoice=prompt('Forma de pagamento:\n1 - PIX\n2 - Cartão de crédito','1');
+ if(billingChoice===null)return;
+ const forma_pagamento=billingChoice.trim()==='1'?'PIX':billingChoice.trim()==='2'?'CREDIT_CARD':null;
+ if(!forma_pagamento){status.textContent='Escolha 1 para PIX ou 2 para cartão de crédito.';return;}
+ const labels={mensal:'Mensal',anual:'Anual',vitalicio:'Vitalício'};
+ status.textContent='Criando checkout '+labels[plan]+'...';
+ const{data,error}=await db.functions.invoke('rapid-endpoint',{body:{plano:plan,forma_pagamento}});
+ if(error){
+  const details=data&&data.error?data.error:error.message;
+  status.textContent='Não foi possível criar o checkout: '+details;
+  return;
+ }
+ if(!data||!data.success||!data.payment_url){
+  status.textContent='A função respondeu sem um link de checkout válido. Nenhum pagamento foi iniciado.';
+  return;
+ }
+ status.textContent='Checkout criado. Você será encaminhado ao Asaas.';
+ location.assign(data.payment_url);
+}
   
 /* ADMINISTRAÇÃO DE ASSINANTES */  
 async function loadAdminRequests(){  
