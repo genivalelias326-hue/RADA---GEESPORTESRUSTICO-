@@ -270,10 +270,11 @@ main{padding:0 11px}
 <h2>🎥 Minhas 10 dicas para vender mais</h2>  
 <p class="muted">Assista ao vídeo com as dicas para melhorar suas estratégias, atrair clientes e aumentar suas vendas.</p>  
 <div id="videoAdminControls" class="hidden">  
-<label style="display:block;font-weight:800;margin:12px 0 6px">Selecionar vídeo para publicar para todos os assinantes</label>  
+<label style="display:block;font-weight:800;margin:12px 0 6px">Trocar ou mudar o vídeo das 10 dicas (administrador)</label>
+<p class="muted">Para trocar o vídeo atual, selecione outro arquivo e clique no botão abaixo. O novo vídeo substituirá o anterior.</p>
 <input type="file" id="videoFile" accept="video/*">  
 <div class="row">  
-<button class="primary" type="button" onclick="loadVideo()">SALVAR VÍDEO PARA TODOS</button>  
+<button class="primary" type="button" onclick="loadVideo()">TROCAR / MUDAR VÍDEO</button>
 <button class="soft" type="button" onclick="removeVideo()">Remover vídeo publicado</button>  
 </div>  
 </div>  
@@ -285,7 +286,7 @@ main{padding:0 11px}
 </section>  <section id="planos" class="section">  
 <div class="panel">  
 <h2>Planos de acesso</h2>  
-<p class="muted">A seleção abaixo registra seu interesse. Nenhum pagamento é processado nesta versão.</p>  
+<p class="muted">Escolha um plano para abrir o checkout Asaas. O acesso é liberado após a confirmação do pagamento.</p>
 <div class="plans">  
 <div class="plan"><span class="pill good">Teste grátis</span><h3>7 dias</h3><div class="price">R$ 0</div><p>Período experimental de 7 dias.</p><button class="soft" onclick="requestPlan('teste_gratis')">Solicitar teste</button></div>  
 <div class="plan"><h3>Mensal</h3><div class="price">R$ 30</div><p>Acesso por mês.</p><button class="primary" onclick="requestPlan('mensal')">Escolher mensal</button></div>  
@@ -1376,4 +1377,5 @@ db.auth.onAuthStateChange((_event,session)=>{
 loadSession();  
 </script>  </body>  
  </html>
+
 
