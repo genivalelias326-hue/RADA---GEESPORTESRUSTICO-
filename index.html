@@ -633,7 +633,7 @@ async function loadProducts(){
   .order('criado_em',{ascending:false});  
   
  if(error){  
-  message('appMessage','Erro ao carregar produtos: '+error.message,'error');  
+  message('appMessage','Não foi possível carregar os produtos: '+error.message+'. Verifique no Supabase se usuários autenticados podem consultar os produtos ativos.','error');
   manualProducts=[];  
  }else{  
   manualProducts=(data||[]).map(p=>({...p,origem:'manual'}));  
@@ -885,6 +885,7 @@ function updateStats(){
 /* CARTÃO DO PRODUTO */  
 function productCard(p){  
  const isShopee=p.origem==='shopee';  
+ const productLocked=!isAdmin&&!hasActiveMembership;
  const isSaved=!isShopee&&saved.some(s=>String(s.produto_id)===String(p.id));  
  const rating=numericValue(p.avaliacao);  
  const muitoBemAvaliado=rating!==null&&rating>=4.5;  
@@ -909,16 +910,17 @@ function productCard(p){
  <span class="pill ${Number(p.comissao)>20?'good':''}">${Number(p.comissao)>20?'COMISSÃO ACIMA DE R$ 20':'COMISSÃO ATÉ R$ 20'}</span>  
  <span class="pill">${esc(p.tendencia||'Sem informação')}</span>  
  `:''}  
+  ${productLocked?'<p class="statusline error" style="display:block">🔒 Visualização liberada. Ative um plano para abrir, salvar ou compartilhar este produto.</p>':''}
  <div class="actions">  
  ${isShopee?'<button class="soft" disabled>Produto da Shopee</button>':`  
- <button class="soft" onclick="toggleSave('${productId}')">${isSaved?'★ Link salvo':'☆ Salvar link'}</button>  
+  ${productLocked?'<button class="soft" disabled>🔒 Salvar após ativar o plano</button>':`<button class="soft" onclick="toggleSave('${productId}')">${isSaved?'★ Link salvo':'☆ Salvar link'}</button>`}
  ${isAdmin?`  
  <button class="orange" onclick="editProduct('${productId}')">✏️ Editar</button>  
  <button class="danger" onclick="deleteProduct('${productId}')">🗑️ Excluir</button>  
  `:''}  
  `}  
- ${p.link_afiliado||p.link_produto?`<button class="primary" onclick="openLink('${productId}')">${isShopee?'🛒 Abrir oferta':'Abrir link'}</button>`:'<button class="soft" disabled>Link não cadastrado</button>'}  
- <button class="soft" onclick="shareProduct('${productId}')">📤 Compartilhar</button>  
+  ${p.link_afiliado||p.link_produto?(productLocked?'<button class="primary" disabled>🔒 Abrir após ativar o plano</button>':`<button class="primary" onclick="openLink('${productId}')">${isShopee?'🛒 Abrir oferta':'Abrir link'}</button>`):'<button class="soft" disabled>Link não cadastrado</button>'}
+  ${productLocked?'<button class="soft" disabled>🔒 Compartilhar após ativar</button>':`<button class="soft" onclick="shareProduct('${productId}')">📤 Compartilhar</button>`}
  </div>  
  </article>`;  
 }  
@@ -992,7 +994,7 @@ function renderProducts(){
   list.sort((a,b)=>(Number(b.vendas)||0)-(Number(a.vendas)||0));  
  }  
   
- $('productList').innerHTML=list.length?list.map(productCard).join(''):'<div class="empty">Nenhum produto encontrado. Digite uma palavra e clique em Buscar na Shopee.</div>';  
+  $('productList').innerHTML=list.length?list.map(productCard).join(''):'<div class="empty">Nenhum produto visível. Confira se há produtos ativos cadastrados e se a leitura da tabela produtos está liberada para usuários autenticados no Supabase.</div>';
  renderOther();  
  updateStats();  
  renderDemandRadar();  
@@ -1045,6 +1047,7 @@ function showTab(id){
   
 /* SALVAR PRODUTOS */  
 async function toggleSave(id){  
+ if(!isAdmin&&!hasActiveMembership){alert('Ative um plano para salvar produtos.');return;}
  const p=manualProducts.find(x=>String(x.id)===String(id));  
  if(!p||!currentUser)return;  
  const old=saved.find(s=>String(s.produto_id)===String(id));  
@@ -1093,6 +1096,7 @@ async function copyRadarLink(){
 }  
   
 async function shareProduct(id){  
+ if(!isAdmin&&!hasActiveMembership){alert('Ative um plano para compartilhar produtos.');return;}
  const p=products.find(x=>String(x.id)===String(id));  
  if(!p)return;  
  const url=p.link_afiliado||p.link_produto||location.href;  
@@ -1111,6 +1115,7 @@ async function shareProduct(id){
 }  
   
 function openLink(id){  
+ if(!isAdmin&&!hasActiveMembership){alert('Ative um plano para abrir os links dos produtos.');return;}
  const p=products.find(x=>String(x.id)===String(id));  
  const url=p&&(p.link_afiliado||p.link_produto);  
  if(url)window.open(url,'_blank','noopener,noreferrer');  
@@ -1126,14 +1131,15 @@ function renderSaved(){
    <div class="muted" style="font-size:12px;word-break:break-all">${esc(s.url)}</div>  
   </div>  
   <div>  
-   <button class="primary" onclick="window.open('${esc(s.url)}','_blank','noopener,noreferrer')">Abrir</button>  
-   <button class="danger" onclick="removeSaved('${s.id}')">Remover</button>  
+    ${!isAdmin&&!hasActiveMembership?'<button class="primary" disabled>🔒 Abrir após ativar o plano</button>':`<button class="primary" onclick="window.open('${esc(s.url)}','_blank','noopener,noreferrer')">Abrir</button>`}
+    ${!isAdmin&&!hasActiveMembership?'<button class="danger" disabled>Remover</button>':`<button class="danger" onclick="removeSaved('${s.id}')">Remover</button>`}
   </div>  
  </div>  
  `).join(''):'<div class="empty">Você ainda não salvou links.</div>';  
 }  
   
 async function removeSaved(id){  
+ if(!isAdmin&&!hasActiveMembership){alert('Ative um plano para usar seus links salvos.');return;}
  const{error}=await db.from('links_salvos').delete().eq('id',id).eq('user_id',currentUser.id);  
  if(error){alert(error.message);return;}  
  await loadSaved();  
@@ -1370,3 +1376,4 @@ db.auth.onAuthStateChange((_event,session)=>{
 loadSession();  
 </script>  </body>  
  </html>
+
