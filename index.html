@@ -650,7 +650,7 @@ async function loadSession(){
    saved=[];
    renderSaved();
   }
- await loadRadarNoveltyCount();  
+  await loadDashboardStats();
  await loadSharedVideo();  
  if(isAdmin)await loadAdminRequests();  
 }  
@@ -911,11 +911,27 @@ async function loadSaved(){
   
 /* INDICADORES */  
 function updateStats(){  
+ if(!isAdmin&&!hasActiveMembership)return;
  $('countProducts').textContent=products.length;  
  $('countHigh').textContent=products.filter(p=>Number(p.comissao)>20).length;  
  $('countNew').textContent=radarNoveltyCount;  
  $('countChampions').textContent=products.filter(p=>Number(p.vendas)>0).length;  
 }  
+
+async function loadDashboardStats(){
+ const{data,error}=await db.rpc('radar_dashboard_counts');
+ if(error){
+  console.error('Erro ao carregar totais do Radar:',error);
+  if(isAdmin)message('appMessage','Não foi possível carregar os totais do Radar: '+error.message,'error');
+  return;
+ }
+ if(!data)return;
+ $('countProducts').textContent=Number(data.produtos)||0;
+ $('countHigh').textContent=Number(data.comissao)||0;
+ $('countNew').textContent=Number(data.novidades)||0;
+ $('countChampions').textContent=Number(data.mais_vendido)||0;
+ radarNoveltyCount=Number(data.novidades)||0;
+}
   
 /* CARTÃO DO PRODUTO */  
 function productCard(p){  
@@ -1422,6 +1438,7 @@ db.auth.onAuthStateChange((_event,session)=>{
 loadSession();  
 </script>  </body>  
  </html>
+
 
 
 
