@@ -37,6 +37,9 @@ main{max-width:1200px;margin:22px auto;padding:0 14px}
 .pill.hot{background:#4a3010;color:#ffd27a;border-color:#c88b24}  
 .video{background:#020711;border:1px solid #20bfff;border-radius:18px;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;box-shadow:0 0 22px #00aaff20}  
 .video video{width:100%;height:100%;object-fit:contain;background:#000}  
+.video-locked-preview{position:relative}
+.video-locked-preview video{pointer-events:none}
+.video-lock-badge{position:absolute;left:8px;right:8px;bottom:8px;padding:7px 9px;border-radius:10px;background:#071a35dd;border:1px solid #3986bb;color:#eaf6ff;font-size:12px;font-weight:800}
 .video-placeholder{padding:16px;color:#d8e5f7}  
 .video-placeholder b{display:block;color:white;margin:8px 0}  
 .video-placeholder small{display:block;color:#b7c9e2}  
@@ -455,7 +458,7 @@ async function loadRadarNoveltyCount(){
   
  if(error){  
   console.error('Erro ao consultar novidades:',error);  
-  message('appMessage','Não foi possível atualizar o contador de novidades: '+error.message,'error');  
+   if(isAdmin)message('appMessage','Não foi possível atualizar o contador de novidades: '+error.message,'error');
   return;  
  }  
   
@@ -517,8 +520,14 @@ async function signUp(){
   message('authMessage','Informe um e-mail válido e uma senha com pelo menos 6 caracteres.','error');  
   return;  
  }  
- const{error}=await db.auth.signUp({email,password});  
- message('authMessage',error?error.message:'Cadastro enviado! Confira seu e-mail se a confirmação estiver ativada. Depois entre com sua conta.',error?'error':'ok');  
+ const{data,error}=await db.auth.signUp({email,password});
+ if(error){message('authMessage',error.message,'error');return;}
+ if(data.session){
+  message('authMessage','Conta criada! Você já entrou no RADAR.','ok');
+  await loadSession();
+ }else{
+  message('authMessage','Conta criada. Se a confirmação por e-mail ainda estiver ativa, confira sua caixa de entrada.','ok');
+ }
 }  
   
 async function signIn(){  
@@ -568,6 +577,21 @@ function switchAccount(){
   $('authPanel').scrollIntoView({behavior:'smooth',block:'start'});  
  }  
 }  
+
+function updateLockedContentLabels(){
+ const locked=!isAdmin&&!hasActiveMembership;
+ const radarHeadings=document.querySelectorAll('#radar .demand-heading h2');
+ if(radarHeadings[0])radarHeadings[0].textContent=locked?'O que mais vende — apenas para assinantes':'🏆 O que mais vende';
+ if(radarHeadings[1])radarHeadings[1].textContent=locked?'Destaque da semana — apenas para assinantes':'🔥 Melhor pra postar nesta semana';
+ const highlightTitle=document.querySelector('#radar .recommendation h3');
+ if(highlightTitle)highlightTitle.textContent=locked?'Destaque de vendas — apenas para assinantes':'🔥 Destaque de vendas';
+ const categoryTitle=document.querySelector('#radar .section-label');
+ if(categoryTitle)categoryTitle.textContent=locked?'Categorias com produtos cadastrados — apenas para assinantes':'Categorias com produtos cadastrados';
+ const bestTitle=document.querySelector('#mais .panel h2');
+ if(bestTitle)bestTitle.textContent=locked?'O que mais vende — apenas para assinantes':'🏆 O que mais vende';
+ const trendsTitle=document.querySelector('#tendencias .panel h2');
+ if(trendsTitle)trendsTitle.textContent=locked?'Destaque da semana — apenas para assinantes':'🔥 Melhor pra postar nesta semana';
+}
   
 async function loadSession(){  
  const{data:{session}}=await db.auth.getSession();  
@@ -586,7 +610,7 @@ async function loadSession(){
  $('authPanel').classList.add('hidden');  
  $('appArea').classList.remove('hidden');  
  $('accountButton').textContent='Trocar conta / sair';  
- $('welcome').textContent='Olá, '+(currentUser.email||'assinante');  
+  $('welcome').textContent=currentUser.email||'assinante';
   
  isAdmin=currentUser.id===ADMIN_USER_ID;  
  $('adminTab').classList.toggle('hidden',!isAdmin);  
@@ -606,21 +630,26 @@ async function loadSession(){
   .maybeSingle();  
   
   hasActiveMembership=isAdmin||paidIsCurrent||(!mErr&&!!member&&member.status==='ativo');  
+  $('searchShopeeButton').disabled=!hasActiveMembership;
+  $('searchShopeeButton').textContent=hasActiveMembership?'🔎 BUSCAR NA SHOPEE':'🔒 BUSCA DISPONÍVEL APÓS ATIVAR O PLANO';
+  updateLockedContentLabels();
   
  if(mErr){  
-  message('appMessage','Não foi possível consultar seu plano: '+mErr.message,'error');  
+   console.error('Erro ao consultar plano legado:',mErr);
+   message('appMessage',isAdmin?'Não foi possível consultar o plano: '+mErr.message:'Bem-vindo ao RADAR! Escolha um plano para liberar os recursos.','ok');
  }else{  
    const accessMember=paidIsCurrent?paidMember:member;
    $('membership').textContent=accessMember?('Plano: '+accessMember.plano+' • Status: '+accessMember.status):'Cadastro de assinante ainda não localizado';  
-   if(!isAdmin&&!hasActiveMembership){  
-   message('appMessage','Seu cadastro está aguardando liberação do administrador. Você poderá acessar os produtos quando seu plano estiver ativo.','error');  
-  }else{  
-   message('appMessage','Acesso liberado. Você já pode pesquisar oportunidades.','ok');  
-  }  
+    message('appMessage',!isAdmin&&!hasActiveMembership?'Bem-vindo ao RADAR! Veja a vitrine e escolha um plano para liberar os recursos.':'Bem-vindo ao RADAR! Acesso liberado.','ok');
  }  
   
  await loadProducts();  
- await loadSaved();  
+  if(isAdmin||hasActiveMembership){
+   await loadSaved();
+  }else{
+   saved=[];
+   renderSaved();
+  }
  await loadRadarNoveltyCount();  
  await loadSharedVideo();  
  if(isAdmin)await loadAdminRequests();  
@@ -628,13 +657,17 @@ async function loadSession(){
   
 /* CARREGAMENTO DOS PRODUTOS MANUAIS */  
 async function loadProducts(){  
+ const productFields=isAdmin||hasActiveMembership
+  ?'*'
+  :'id,nome,categoria,descricao,preco,comissao,vendas,concorrencia,tendencia,imagem_url,ativo,criado_em';
  const{data,error}=await db.from('produtos')  
-  .select('*')  
+  .select(productFields)
   .eq('ativo',true)  
   .order('criado_em',{ascending:false});  
   
  if(error){  
-  message('appMessage','Não foi possível carregar os produtos: '+error.message+'. Verifique no Supabase se usuários autenticados podem consultar os produtos ativos.','error');
+  console.error('Erro ao carregar produtos:',error);
+  if(isAdmin)message('appMessage','Não foi possível carregar os produtos: '+error.message,'error');
   manualProducts=[];  
  }else{  
   manualProducts=(data||[]).map(p=>({...p,origem:'manual'}));  
@@ -866,7 +899,8 @@ async function loadSaved(){
   .order('criado_em',{ascending:false});  
   
  if(error){  
-  message('appMessage','Erro ao carregar seus links: '+error.message,'error');  
+  console.error('Erro ao carregar links salvos:',error);
+  if(isAdmin)message('appMessage','Erro ao carregar seus links: '+error.message,'error');
   saved=[];  
  }else{  
   saved=data||[];  
@@ -920,7 +954,7 @@ function productCard(p){
  <button class="danger" onclick="deleteProduct('${productId}')">🗑️ Excluir</button>  
  `:''}  
  `}  
-  ${p.link_afiliado||p.link_produto?(productLocked?'<button class="primary" disabled>🔒 Abrir após ativar o plano</button>':`<button class="primary" onclick="openLink('${productId}')">${isShopee?'🛒 Abrir oferta':'Abrir link'}</button>`):'<button class="soft" disabled>Link não cadastrado</button>'}
+  ${productLocked?'<button class="primary" disabled>🔒 Abrir após ativar o plano</button>':(p.link_afiliado||p.link_produto?`<button class="primary" onclick="openLink('${productId}')">${isShopee?'🛒 Abrir oferta':'Abrir link'}</button>`:'<button class="soft" disabled>Link não cadastrado</button>')}
   ${productLocked?'<button class="soft" disabled>🔒 Compartilhar após ativar</button>':`<button class="soft" onclick="shareProduct('${productId}')">📤 Compartilhar</button>`}
  </div>  
  </article>`;  
@@ -944,12 +978,16 @@ function renderDemandRadar(){
     <strong>${i===0?'🔥 ':''}${esc(c.name)}</strong>  
     <span>${c.sales>0?c.sales.toLocaleString('pt-BR')+' vendas informadas':c.items+' produto(s) cadastrado(s)'}</span>  
    </div>`).join('')  
-  :'<div class="empty" style="grid-column:1/-1">As categorias aparecerão aqui quando houver produtos cadastrados.</div>';  
+  :( !isAdmin&&!hasActiveMembership
+    ?'<div class="empty" style="grid-column:1/-1">Categorias com produtos cadastrados — conteúdo apenas para assinantes.</div>'
+    :'<div class="empty" style="grid-column:1/-1">As categorias aparecerão aqui quando houver produtos cadastrados.</div>');
   
  const winner=ordered[0];  
  $('categoryHighlight').innerHTML=winner  
   ?`<span class="highlight">${esc(winner.name)}</span> é a categoria com maior volume de vendas informado entre os produtos cadastrados. <b>${winner.sales.toLocaleString('pt-BR')}</b> vendas informadas em <b>${winner.items}</b> produto(s).`  
-  :'Cadastre produtos com categoria e quantidade de vendas para identificar os destaques.';  
+  :(!isAdmin&&!hasActiveMembership
+    ?'Destaque de vendas — conteúdo apenas para assinantes.'
+    :'Cadastre produtos com categoria e quantidade de vendas para identificar os destaques.');
   
  const maxSales=Math.max(1,...ordered.map(c=>c.sales));  
  $('categoryRanking').innerHTML=ordered.length  
@@ -958,7 +996,9 @@ function renderDemandRadar(){
     <div class="rank-label"><span>${esc(c.name)}</span><span>${c.sales>0?c.sales.toLocaleString('pt-BR')+' vendas':c.items+' produto(s)'}</span></div>  
     <div class="rank-track"><div class="rank-fill" style="width:${c.sales>0?Math.max(4,c.sales/maxSales*100):Math.max(4,c.items/Math.max(1,...ordered.map(x=>x.items))*100)}%"></div></div>  
    </div>`).join('')  
-  :'<div class="empty">Nenhuma categoria possui produtos cadastrados ainda.</div>';  
+  :(!isAdmin&&!hasActiveMembership
+    ?'<div class="empty">Categorias com produtos cadastrados — conteúdo apenas para assinantes.</div>'
+    :'<div class="empty">Nenhuma categoria possui produtos cadastrados ainda.</div>');
   
  const recommendations=[...products]  
   .filter(p=>Number(p.vendas)>0)  
@@ -971,10 +1011,12 @@ function renderDemandRadar(){
     ${p.imagem_url?`<img src="${esc(p.imagem_url)}" alt="${esc(p.nome)}" loading="lazy">`:''}  
     <span class="pill hot">#${i+1} DESTAQUE</span>  
     <strong>${esc(p.nome)}</strong>  
-    <small>🔥 ${Number(p.vendas).toLocaleString('pt-BR')} vendas informadas</small>  
-    <div style="margin-top:9px"><button class="primary" onclick="openLink('${String(p.id).replace(/'/g,"\\'")}')">Ver produto</button></div>  
+    <small>🔥 ${Number(p.vendas).toLocaleString('pt-BR')} vendas informadas</small>
+    <div style="margin-top:9px">${!isAdmin&&!hasActiveMembership?'<button class="primary" disabled>🔒 Ative um plano para abrir</button>':`<button class="primary" onclick="openLink('${String(p.id).replace(/'/g,"\\'")}')">Ver produto</button>`}</div>
    </div>`).join('')  
-  :'<div class="empty" style="grid-column:1/-1">Ainda não há produtos com vendas informadas para recomendar. Faça uma busca na Shopee ou cadastre produtos com dados de vendas.</div>';  
+  :(!isAdmin&&!hasActiveMembership
+    ?'<div class="empty" style="grid-column:1/-1">Destaque da semana — conteúdo apenas para assinantes.</div>'
+    :'<div class="empty" style="grid-column:1/-1">Ainda não há produtos com vendas informadas para recomendar. Faça uma busca na Shopee ou cadastre produtos com dados de vendas.</div>');
 }  
   
 /* FILTROS E EXIBIÇÃO */  
@@ -995,7 +1037,7 @@ function renderProducts(){
   list.sort((a,b)=>(Number(b.vendas)||0)-(Number(a.vendas)||0));  
  }  
   
-  $('productList').innerHTML=list.length?list.map(productCard).join(''):'<div class="empty">Nenhum produto visível. Confira se há produtos ativos cadastrados e se a leitura da tabela produtos está liberada para usuários autenticados no Supabase.</div>';
+  $('productList').innerHTML=list.length?list.map(productCard).join(''):(!isAdmin&&!hasActiveMembership?'<div class="empty">Produtos do Radar — conteúdo apenas para assinantes.</div>':'<div class="empty">Nenhum produto visível. Confira se há produtos ativos cadastrados e se a leitura está liberada no Supabase.</div>');
  renderOther();  
  updateStats();  
  renderDemandRadar();  
@@ -1003,12 +1045,12 @@ function renderProducts(){
   
 function renderOther(){  
  const best=[...products].sort((a,b)=>(Number(b.vendas)||0)-(Number(a.vendas)||0));  
- $('bestList').innerHTML=best.length?best.map(productCard).join(''):'<div class="empty">Nenhum produto cadastrado.</div>';  
+  $('bestList').innerHTML=best.length?best.map(productCard).join(''):(!isAdmin&&!hasActiveMembership?'<div class="empty">O que mais vende — conteúdo apenas para assinantes.</div>':'<div class="empty">Nenhum produto cadastrado.</div>');
   
  const trends=products.filter(p=>p.tendencia==='Em alta'||Number(p.vendas)>0)  
   .sort((a,b)=>(Number(b.vendas)||0)-(Number(a.vendas)||0));  
   
- $('trendList').innerHTML=trends.length?trends.map(productCard).join(''):'<div class="empty">Ainda não há produtos com vendas ou tendência informada para recomendar.</div>';  
+  $('trendList').innerHTML=trends.length?trends.map(productCard).join(''):(!isAdmin&&!hasActiveMembership?'<div class="empty">Destaque da semana — conteúdo apenas para assinantes.</div>':'<div class="empty">Ainda não há produtos com vendas ou tendência informada para recomendar.</div>');
   
  if(isAdmin){  
   $('adminList').innerHTML=manualProducts.map(p=>{  
@@ -1125,11 +1167,11 @@ function openLink(id){
   
 /* LINKS SALVOS */  
 function renderSaved(){  
- $('savedList').innerHTML=saved.length?saved.map(s=>`  
+ $('savedList').innerHTML=(!isAdmin&&!hasActiveMembership)?'<div class="empty">Links salvos — conteúdo apenas para assinantes.</div>':saved.length?saved.map(s=>`
  <div class="row" style="justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:9px 0">  
   <div>  
    <b>${esc(s.titulo)}</b>  
-   <div class="muted" style="font-size:12px;word-break:break-all">${esc(s.url)}</div>  
+  <div class="muted" style="font-size:12px;word-break:break-all">${!isAdmin&&!hasActiveMembership?'Link oculto até ativar o plano':esc(s.url)}</div>
   </div>  
   <div>  
     ${!isAdmin&&!hasActiveMembership?'<button class="primary" disabled>🔒 Abrir após ativar o plano</button>':`<button class="primary" onclick="window.open('${esc(s.url)}','_blank','noopener,noreferrer')">Abrir</button>`}
@@ -1288,30 +1330,33 @@ function showVideoPlaceholder(text){
  });  
 }  
   
-function displaySharedVideo(url){  
+function displaySharedVideo(url,lockedPreview=false){
  ['videoPreview','heroVideo'].forEach(id=>{  
   const box=$(id);  
   if(!box)return;  
-  box.innerHTML='<video controls playsinline preload="metadata"></video>';  
-  box.querySelector('video').src=url;  
+  box.classList.toggle('video-locked-preview',lockedPreview);
+  if(lockedPreview){
+   box.innerHTML='<video playsinline preload="auto" muted tabindex="-1" aria-label="Prévia pausada do vídeo"></video><div class="video-lock-badge">🔒 Vídeo completo apenas para assinantes</div>';
+  }else{
+   box.innerHTML='<video controls playsinline preload="metadata"></video>';
+  }
+  const video=box.querySelector('video');
+  video.src=url;
+  video.controls=!lockedPreview;
  });  
 }  
   
 async function loadSharedVideo(){  
- if(!hasActiveMembership){  
-  showVideoPlaceholder('O vídeo é exclusivo para assinantes com plano ativo.');  
-  return;  
- }  
-  
- const{data,error}=await db.storage.from(VIDEO_BUCKET).createSignedUrl(VIDEO_PATH,86400);  
+ const lockedPreview=!isAdmin&&!hasActiveMembership;
+ const{data,error}=await db.storage.from(VIDEO_BUCKET).createSignedUrl(VIDEO_PATH,lockedPreview?300:86400);
   
  if(error){  
-  showVideoPlaceholder('O vídeo ainda não foi publicado pelo administrador.');  
+  showVideoPlaceholder(lockedPreview?'Prévia do vídeo exclusiva para assinantes.':'O vídeo ainda não foi publicado pelo administrador.');
   if(isAdmin)message('videoMessage','Não foi possível localizar o vídeo: '+error.message,'');  
   return;  
  }  
   
- displaySharedVideo(data.signedUrl);  
+ displaySharedVideo(data.signedUrl,lockedPreview);
  if(isAdmin)message('videoMessage','Vídeo publicado e disponível para os assinantes ativos.','ok');  
 }  
   
@@ -1377,5 +1422,6 @@ db.auth.onAuthStateChange((_event,session)=>{
 loadSession();  
 </script>  </body>  
  </html>
+
 
 
