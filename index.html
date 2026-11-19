@@ -1273,39 +1273,142 @@ async function deleteProduct(id){
  await loadSaved();  
 }  
   
-/* PLANOS */  
-async function requestPlan(plan){
- const status=$('planStatus');
- status.style.display='block';
- if(plan==='teste_gratis'){
-  status.textContent='O teste grátis de 7 dias ainda não pode ser ativado automaticamente: a função rapid-endpoint enviada não implementa esse plano. Peça a ativação ao administrador.';
-  return;
- }
- if(!currentUser){
-  status.textContent='Entre ou crie sua conta antes de continuar para o checkout.';
-  $('authPanel').classList.remove('hidden');
-  $('authPanel').scrollIntoView({behavior:'smooth',block:'start'});
-  return;
- }
- const billingChoice=prompt('Forma de pagamento:\n1 - PIX\n2 - Cartão de crédito','1');
- if(billingChoice===null)return;
- const forma_pagamento=billingChoice.trim()==='1'?'PIX':billingChoice.trim()==='2'?'CREDIT_CARD':null;
- if(!forma_pagamento){status.textContent='Escolha 1 para PIX ou 2 para cartão de crédito.';return;}
- const labels={mensal:'Mensal',anual:'Anual',vitalicio:'Vitalício'};
- status.textContent='Criando checkout '+labels[plan]+'...';
- const{data,error}=await db.functions.invoke('rapid-endpoint',{body:{plano:plan,forma_pagamento}});
- if(error){
-  const details=data&&data.error?data.error:error.message;
-  status.textContent='Não foi possível criar o checkout: '+details;
-  return;
- }
- if(!data||!data.success||!data.payment_url){
-  status.textContent='A função respondeu sem um link de checkout válido. Nenhum pagamento foi iniciado.';
-  return;
- }
- status.textContent='Checkout criado. Você será encaminhado ao Asaas.';
- location.assign(data.payment_url);
+
+/* PLANOS */
+async function requestPlan(plan) {
+  const status = $('planStatus');
+  status.style.display = 'block';
+
+  if (!currentUser) {
+    status.textContent = 'Entre ou crie sua conta antes de continuar.';
+    $('authPanel').classList.remove('hidden');
+    $('authPanel').scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+    return;
+  }
+
+  // ATIVAÇÃO AUTOMÁTICA DO TESTE GRÁTIS
+  if (plan === 'teste_gratis') {
+    status.textContent = 'Ativando seu teste grátis de 7 dias...';
+
+    try {
+      const { data, error } = await db.rpc(
+        'radar_iniciar_teste_gratis'
+      );
+
+      if (error) {
+        console.error('Erro ao ativar teste:', error);
+        status.textContent =
+          'Não foi possível ativar o teste: ' + error.message;
+        return;
+      }
+
+      if (!data || !data.success) {
+        status.textContent =
+          data?.message || 'Não foi possível ativar o teste grátis.';
+        return;
+      }
+
+      await loadSession();
+
+      const fim = data.fim_periodo
+        ? new Date(data.fim_periodo).toLocaleString('pt-BR')
+        : 'daqui a 7 dias';
+
+      status.textContent =
+        '🎉 Teste grátis ativado com sucesso! Seu acesso ficará disponível até ' +
+        fim + '.';
+
+      message(
+        'appMessage',
+        'Teste grátis de 7 dias ativado! Aproveite seu acesso ao RADAR.',
+        'ok'
+      );
+
+      showTab('radar');
+      return;
+
+    } catch (err) {
+      console.error(err);
+      status.textContent =
+        'Erro ao ativar o teste grátis: ' +
+        (err?.message || String(err));
+      return;
+    }
+  }
+
+  // PAGAMENTOS DOS PLANOS
+  const billingChoice = prompt(
+    'Forma de pagamento:\n1 - PIX\n2 - Cartão de crédito',
+    '1'
+  );
+
+  if (billingChoice === null) return;
+
+  const forma_pagamento =
+    billingChoice.trim() === '1'
+      ? 'PIX'
+      : billingChoice.trim() === '2'
+        ? 'CREDIT_CARD'
+        : null;
+
+  if (!forma_pagamento) {
+    status.textContent =
+      'Escolha 1 para PIX ou 2 para cartão de crédito.';
+    return;
+  }
+
+  const labels = {
+    mensal: 'Mensal',
+    anual: 'Anual',
+    vitalicio: 'Vitalício'
+  };
+
+  status.textContent =
+    'Criando checkout ' + (labels[plan] || plan) + '...';
+
+  try {
+    const { data, error } = await db.functions.invoke(
+      'rapid-endpoint',
+      {
+        body: {
+          plano: plan,
+          forma_pagamento
+        }
+      }
+    );
+
+    if (error) {
+      console.error('Erro no checkout:', error);
+      const details =
+        data && data.error ? data.error : error.message;
+
+      status.textContent =
+        'Não foi possível criar o checkout: ' + details;
+      return;
+    }
+
+    if (!data || !data.success || !data.payment_url) {
+      status.textContent =
+        'A função respondeu sem um link de checkout válido. Nenhum pagamento foi iniciado.';
+      return;
+    }
+
+    status.textContent =
+      'Checkout criado. Você será encaminhado ao Asaas.';
+
+    location.assign(data.payment_url);
+
+  } catch (err) {
+    console.error(err);
+    status.textContent =
+      'Erro ao criar pagamento: ' +
+      (err?.message || String(err));
+  }
 }
+
   
 /* ADMINISTRAÇÃO DE ASSINANTES */  
 async function loadAdminRequests(){  
