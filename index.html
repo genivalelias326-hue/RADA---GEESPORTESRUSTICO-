@@ -4,7 +4,13 @@
 <head>  
 <meta charset="utf-8">  
 <meta name="viewport" content="width=device-width,initial-scale=1">  
-<meta name="theme-color" content="#10284f">  
+<meta name="theme-color" content="#10284f">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">  
 <title>RADAR DE DICAS PARA VOCÊ COMEÇAR A VENDER</title>  
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  
 <style>  
@@ -1566,7 +1572,24 @@ db.auth.onAuthStateChange((_event,session)=>{
 });  
   
 loadSession();  
-</script>  </body>  
+</script>
+<script>
+/* REGISTRO DO APLICATIVO RADAR GE (PWA) */
+(function () {
+  if (!('serviceWorker' in navigator)) return;
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
+      .then(function (registration) {
+        registration.update().catch(function () {});
+        console.log('RADAR GE: aplicativo pronto para instalação.');
+      })
+      .catch(function (error) {
+        console.error('RADAR GE: não foi possível ativar o modo aplicativo:', error);
+      });
+  });
+})();
+</script>
+</body>  
  </html>
 
 
