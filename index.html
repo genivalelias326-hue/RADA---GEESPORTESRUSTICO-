@@ -349,7 +349,9 @@ const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
   
 let currentUser=null;  
 let isAdmin=false;  
-let hasActiveMembership=false;  
+let hasActiveMembership=false;
+let hasPaidMembership=false;
+let hasTrialAccess=false;  
 let products=[];  
 let manualProducts=[];  
 let shopeeProducts=[];  
@@ -667,7 +669,7 @@ async function loadSession(){
    console.error('Erro ao consultar plano legado:',mErr);
    message('appMessage',isAdmin?'Não foi possível consultar o plano: '+mErr.message:'Bem-vindo ao RADAR! Escolha um plano para liberar os recursos.','ok');
  }else{  
-   const accessMember=paidCurrent?paidMember:member;
+   const accessMember=paidIsCurrent?paidMember:member;
    $('membership').textContent=accessMember?('Plano: '+accessMember.plano+' • Status: '+accessMember.status):hasTrialAccess?'Plano: teste grátis • acesso demonstrativo':'Cadastro de assinante ainda não localizado';  
     message('appMessage',hasTrialAccess?'Teste grátis ativo: demonstrações limitadas por 7 dias.':(!isAdmin&&!hasPaidMembership?'Bem-vindo ao RADAR! Escolha um plano para liberar a busca Shopee.':'Bem-vindo ao RADAR! Acesso completo liberado.'),'ok');
  }  
