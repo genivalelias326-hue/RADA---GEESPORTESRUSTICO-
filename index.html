@@ -171,7 +171,7 @@ main{padding:0 11px}
 <div class="video-placeholder">▶<b>MINHAS 10 DICAS PARA VENDER MAIS</b><small>O vídeo ficará disponível aqui para os assinantes ativos.</small></div>  
 </div>  
 </section>  <div class="notice" id="notice">  
-<b>Importante:</b> os dados de vendas, comissão e concorrência dependem das informações disponíveis. A busca automática utiliza a integração configurada com a Shopee. O Índice de Oportunidade é uma estimativa comparativa, não uma garantia de vendas.  
+<b>Importante:</b> os dados de vendas, comissão e concorrência dependem das informações disponíveis. No teste grátis, a busca automática na Shopee fica bloqueada; os produtos demonstrativos são cadastrados pelo administrador. O Índice de Oportunidade é uma estimativa comparativa, não uma garantia de vendas.  
 </div>  <section class="authbox panel" id="authPanel">  
 <h2>Acesse sua conta</h2>  
 <p class="muted">Entre ou crie seu cadastro para acessar o Radar.</p>  
@@ -192,7 +192,7 @@ main{padding:0 11px}
 <div id="appMessage" class="statusline"></div>  
 </div>  <section class="stats">  
 <div class="stat"><strong id="countProducts">0</strong><small>Produtos encontrados</small></div>  
-<div class="stat"><strong id="countHigh">0</strong><small>Comissão acima de R$ 20</small></div>  
+<div class="stat"><strong id="countHigh">0</strong><small>Comissão acima de 20%</small></div>  
 <div class="stat"><strong id="countNew">0</strong><small>NOVIDADES DETECTADAS PELO RADAR</small></div>  
 <div class="stat"><strong id="countChampions">0</strong><small>O QUE MAIS VENDE</small></div>  
 </section>  <nav class="tabs">  
@@ -224,7 +224,10 @@ main{padding:0 11px}
 </div>  
 <p class="demand-subtitle">Produtos com vendas informadas e boas oportunidades para divulgar. Confira os resultados antes de escolher o que postar.</p>  
 <div id="weeklyRecommendations" class="recommendation-list"></div>  
-</div>  <div class="panel">  
+</div>
+<div class="panel"><h2>💰 Exemplos de comissões acima de 20%</h2><p class="muted">Até 5 produtos cadastrados pelo administrador.</p><div id="commissionDemo" class="products"></div></div>
+<div class="panel"><h2>🎯 Camada de concorrência — baixa</h2><p class="muted">Classificação automática pela quantidade de afiliados cadastrada.</p><div id="competitionDemo" class="products"></div></div>
+<div class="panel">  
 <h2>Buscar oportunidades</h2>  
 <p class="muted">Digite o nome do produto e clique em Buscar na Shopee para consultar as ofertas disponíveis.</p>  
 <div class="filters">  
@@ -315,7 +318,8 @@ main{padding:0 11px}
 <label>Categoria<select id="pcat"><option>Pet</option><option>Cozinha</option><option>Moda</option><option>Acessórios</option><option>Casa</option><option>Tech</option><option>Infantil</option><option>Fitness</option><option>Saúde</option><option>Eletrônicos</option><option>Esportes</option><option>Beleza</option><option>Outros</option></select></label>  
 <label>Descrição<input id="pdesc"></label>  
 <label>Preço (R$)<input type="number" min="0" step="0.01" id="pprice"></label>  
-<label>Comissão (R$)<input required type="number" min="0" step="0.01" id="pcommission"></label>  
+<label>Comissão (R$)<input type="number" min="0" step="0.01" id="pcommission"></label>
+<label>Comissão (%)<input type="number" min="0" max="100" step="0.01" id="pcommissionRate"></label>  
 <label>Vendas informadas<input type="number" min="0" id="psales"></label>  
 <label>Concorrência estimada (nº de afiliados)<input type="number" min="0" id="paffiliates"></label>  
 <label>Tendência<select id="ptrend"><option>Sem informação</option><option>Em alta</option><option>Estável</option><option>Em queda</option></select></label>  
@@ -578,8 +582,33 @@ function switchAccount(){
  }  
 }  
 
+
+function isPaidPlanName(plan){return ['mensal','anual','vitalicio','vitalício'].includes(String(plan||'').toLowerCase());}
+function isTrialPlanName(plan){const p=String(plan||'').toLowerCase();return p.includes('teste')||p.includes('gratis')||p.includes('grátis')||p.includes('trial');}
+function validUntil(date){return !date||new Date(date).getTime()>Date.now();}
+function competitionLevel(value){
+ const n=numericValue(value); if(n===null)return 'Sem dados';
+ const values=manualProducts.map(p=>numericValue(p.concorrencia)).filter(v=>v!==null).sort((a,b)=>a-b);
+ if(!values.length)return 'Sem dados';
+ const rank=values.filter(v=>v<=n).length/values.length;
+ return rank<=.33?'Baixa':rank<=.67?'Média':'Alta';
+}
+function renderTrialShowcase(){
+ if(!hasTrialAccess||isAdmin)return;
+ const source=manualProducts;
+ const top=[...source].sort((a,b)=>(Number(b.vendas)||0)-(Number(a.vendas)||0));
+ const hot=source.filter(p=>String(p.tendencia||'').toLowerCase()==='em alta').sort((a,b)=>(Number(b.vendas)||0)-(Number(a.vendas)||0)).slice(0,10);
+ const commission=source.filter(p=>Number(p.taxa_comissao??p.taxaComissao)>20).sort((a,b)=>(Number(b.taxa_comissao??b.taxaComissao)||0)-(Number(a.taxa_comissao??a.taxaComissao)||0)).slice(0,5);
+ const low=source.filter(p=>competitionLevel(p.concorrencia)==='Baixa').sort((a,b)=>(Number(a.concorrencia)||0)-(Number(b.concorrencia)||0));
+ $('bestList').innerHTML=top.length?top.map(productCard).join(''):'<div class="empty">Cadastre produtos demonstrativos no Radar.</div>';
+ $('trendList').innerHTML=hot.length?hot.map(productCard).join(''):'<div class="empty">Marque até 10 produtos como “Em alta” no cadastro.</div>';
+ $('weeklyRecommendations').innerHTML=top.slice(0,1).map(p=>`<div class="recommendation-item">${p.imagem_url?`<img src="${esc(p.imagem_url)}" alt="${esc(p.nome)}">`:''}<strong>${esc(p.nome)}</strong><small>Exemplo de postagem</small><p class="muted">Demonstração cadastrada pelo administrador.</p></div>`).join('')||'<div class="empty">Nenhum produto demonstrativo cadastrado.</div>';
+ $('commissionDemo').innerHTML=commission.length?commission.map(productCard).join(''):'<div class="empty">Cadastre a taxa de comissão acima de 20% para exibir até 5 produtos.</div>';
+ $('competitionDemo').innerHTML=low.length?low.map(productCard).join(''):'<div class="empty">Ainda não há dados suficientes para identificar baixa concorrência.</div>';
+}
+
 function updateLockedContentLabels(){
- const locked=!isAdmin&&!hasActiveMembership;
+ const locked=!isAdmin&&!hasPaidMembership&&!hasTrialAccess;
  const radarHeadings=document.querySelectorAll('#radar .demand-heading h2');
  if(radarHeadings[0])radarHeadings[0].textContent=locked?'O que mais vende — apenas para assinantes':'🏆 O que mais vende';
  if(radarHeadings[1])radarHeadings[1].textContent=locked?'Destaque da semana — apenas para assinantes':'🔥 Melhor pra postar nesta semana';
@@ -638,9 +667,9 @@ async function loadSession(){
    console.error('Erro ao consultar plano legado:',mErr);
    message('appMessage',isAdmin?'Não foi possível consultar o plano: '+mErr.message:'Bem-vindo ao RADAR! Escolha um plano para liberar os recursos.','ok');
  }else{  
-   const accessMember=paidIsCurrent?paidMember:member;
-   $('membership').textContent=accessMember?('Plano: '+accessMember.plano+' • Status: '+accessMember.status):'Cadastro de assinante ainda não localizado';  
-    message('appMessage',!isAdmin&&!hasActiveMembership?'Bem-vindo ao RADAR! Veja a vitrine e escolha um plano para liberar os recursos.':'Bem-vindo ao RADAR! Acesso liberado.','ok');
+   const accessMember=paidCurrent?paidMember:member;
+   $('membership').textContent=accessMember?('Plano: '+accessMember.plano+' • Status: '+accessMember.status):hasTrialAccess?'Plano: teste grátis • acesso demonstrativo':'Cadastro de assinante ainda não localizado';  
+    message('appMessage',hasTrialAccess?'Teste grátis ativo: demonstrações limitadas por 7 dias.':(!isAdmin&&!hasPaidMembership?'Bem-vindo ao RADAR! Escolha um plano para liberar a busca Shopee.':'Bem-vindo ao RADAR! Acesso completo liberado.'),'ok');
  }  
   
  await loadProducts();  
@@ -657,9 +686,7 @@ async function loadSession(){
   
 /* CARREGAMENTO DOS PRODUTOS MANUAIS */  
 async function loadProducts(){  
- const productFields=isAdmin||hasActiveMembership
-  ?'*'
-  :'id,nome,categoria,descricao,preco,comissao,vendas,concorrencia,tendencia,imagem_url,ativo,criado_em';
+ const productFields='*';
  const{data,error}=await db.from('produtos')  
   .select(productFields)
   .eq('ativo',true)  
@@ -670,11 +697,12 @@ async function loadProducts(){
   if(isAdmin)message('appMessage','Não foi possível carregar os produtos: '+error.message,'error');
   manualProducts=[];  
  }else{  
-  manualProducts=(data||[]).map(p=>({...p,origem:'manual'}));  
+  manualProducts=(data||[]).map(p=>({...p,taxaComissao:p.taxa_comissao??p.taxaComissao,origem:'manual'}));  
  }  
   
  products=[...shopeeProducts,...manualProducts];  
- renderProducts();  
+ renderProducts();
+ renderTrialShowcase();
 }  
   
 /* NORMALIZAÇÃO DOS RESULTADOS DA SHOPEE */  
@@ -853,7 +881,8 @@ async function fetchShopeeProduct(){
    :'Produto encontrado na Shopee';  
   
   $('pprice').value=numericValue(normalized.preco)??'';  
-  $('pcommission').value=numericValue(normalized.comissao)??'';  
+  $('pcommission').value=numericValue(normalized.comissao)??'';
+  $('pcommissionRate').value=numericValue(normalized.taxaComissao)??'';  
   $('psales').value=numericValue(normalized.vendas)??'';  
   $('paffiliates').value='';  
   $('ptrend').value='Sem informação';  
@@ -911,14 +940,15 @@ async function loadSaved(){
   
 /* INDICADORES */  
 function updateStats(){  
- if(!isAdmin&&!hasActiveMembership)return;
+ if(!isAdmin&&!hasPaidMembership&&!hasTrialAccess)return;
  $('countProducts').textContent=products.length;  
- $('countHigh').textContent=products.filter(p=>Number(p.comissao)>20).length;  
+ $('countHigh').textContent=products.filter(p=>Number(p.taxa_comissao??p.taxaComissao)>20).length;  
  $('countNew').textContent=radarNoveltyCount;  
  $('countChampions').textContent=products.filter(p=>Number(p.vendas)>0).length;  
 }  
 
 async function loadDashboardStats(){
+ if(hasTrialAccess&&!isAdmin){updateStats();return;}
  const{data,error}=await db.rpc('radar_dashboard_counts');
  if(error){
   console.error('Erro ao carregar totais do Radar:',error);
@@ -936,7 +966,7 @@ async function loadDashboardStats(){
 /* CARTÃO DO PRODUTO */  
 function productCard(p){  
  const isShopee=p.origem==='shopee';  
- const productLocked=!isAdmin&&!hasActiveMembership;
+ const productLocked=!isAdmin&&!hasPaidMembership;
  const isSaved=!isShopee&&saved.some(s=>String(s.produto_id)===String(p.id));  
  const rating=numericValue(p.avaliacao);  
  const muitoBemAvaliado=rating!==null&&rating>=4.5;  
@@ -955,7 +985,7 @@ function productCard(p){
   <div><b>${p.concorrencia==null?'—':esc(p.concorrencia)}</b><small>Concorrência informada</small></div>  
   <div><b>${money(p.comissao)}</b><small>Comissão em valor</small></div>  
  </div>  
- ${p.taxaComissao!==null&&p.taxaComissao!==undefined&&p.taxaComissao!==''?`<span class="pill good">TAXA INFORMADA: ${esc(p.taxaComissao)}%</span>`:''}  
+ ${(p.taxa_comissao??p.taxaComissao)!=null?`<span class="pill good">COMISSÃO: ${esc(p.taxa_comissao??p.taxaComissao)}%</span>`:''}<span class="pill">CONCORRÊNCIA: ${esc(competitionLevel(p.concorrencia))}</span>  
  ${p.avaliacao!==null&&p.avaliacao!==undefined&&p.avaliacao!==''?`<span class="pill">AVALIAÇÃO: ${esc(p.avaliacao)}</span>`:''}  
  ${!isShopee?`  
  <span class="pill ${Number(p.comissao)>20?'good':''}">${Number(p.comissao)>20?'COMISSÃO ACIMA DE R$ 20':'COMISSÃO ATÉ R$ 20'}</span>  
@@ -1019,7 +1049,7 @@ function renderDemandRadar(){
  const recommendations=[...products]  
   .filter(p=>Number(p.vendas)>0)  
   .sort((a,b)=>(Number(b.vendas)||0)-(Number(a.vendas)||0))  
-  .slice(0,3);  
+  .slice(0,(hasTrialAccess&&!isAdmin)?1:3);  
   
  $('weeklyRecommendations').innerHTML=recommendations.length  
   ?recommendations.map((p,i)=>`  
@@ -1044,7 +1074,7 @@ function renderProducts(){
   
  let list=products.filter(p=>  
   (p.nome+' '+(p.categoria||'')).toLowerCase().includes(q)&&  
-  (c==='all'||Number(p.comissao)>20)&&  
+  (c==='all'||Number(p.taxa_comissao??p.taxaComissao)>20)&&  
   (k==='all'||(k==='popular'&&Number(p.vendas)>0))&&  
   (cat==='all'||p.categoria===cat)  
  );  
@@ -1059,30 +1089,27 @@ function renderProducts(){
  renderDemandRadar();  
 }  
   
-function renderOther(){  
- const best=[...products].sort((a,b)=>(Number(b.vendas)||0)-(Number(a.vendas)||0));  
-  $('bestList').innerHTML=best.length?best.map(productCard).join(''):(!isAdmin&&!hasActiveMembership?'<div class="empty">O que mais vende — conteúdo apenas para assinantes.</div>':'<div class="empty">Nenhum produto cadastrado.</div>');
-  
- const trends=products.filter(p=>p.tendencia==='Em alta'||Number(p.vendas)>0)  
-  .sort((a,b)=>(Number(b.vendas)||0)-(Number(a.vendas)||0));  
-  
-  $('trendList').innerHTML=trends.length?trends.map(productCard).join(''):(!isAdmin&&!hasActiveMembership?'<div class="empty">Destaque da semana — conteúdo apenas para assinantes.</div>':'<div class="empty">Ainda não há produtos com vendas ou tendência informada para recomendar.</div>');
-  
- if(isAdmin){  
-  $('adminList').innerHTML=manualProducts.map(p=>{  
-   const id=String(p.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'");  
-   return `  
-   <div class="row" style="justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:8px 0">  
-    <span>${esc(p.nome)}</span>  
-    <span>  
-     <button class="soft" onclick="editProduct('${id}')">Editar</button>  
-     <button class="danger" onclick="deleteProduct('${id}')">Excluir</button>  
-    </span>  
-   </div>`;  
-  }).join('')||'Nenhum produto manual cadastrado.';  
- }  
-}  
-  
+function renderOther(){
+ const best=[...manualProducts].sort((a,b)=>(Number(b.vendas)||0)-(Number(a.vendas)||0));
+ const trends=manualProducts.filter(p=>String(p.tendencia||'').toLowerCase()==='em alta').sort((a,b)=>(Number(b.vendas)||0)-(Number(a.vendas)||0));
+ if(hasTrialAccess&&!isAdmin){
+  $('bestList').innerHTML=best.length?best.map(productCard).join(''):'<div class="empty">Cadastre produtos demonstrativos no painel administrativo.</div>';
+  $('trendList').innerHTML=trends.slice(0,10).map(productCard).join('')||'<div class="empty">Nenhum produto marcado como “Em alta”.</div>';
+ }else{
+  const allBest=[...products].sort((a,b)=>(Number(b.vendas)||0)-(Number(a.vendas)||0));
+  $('bestList').innerHTML=allBest.length?allBest.map(productCard).join(''):'<div class="empty">Nenhum produto cadastrado.</div>';
+  const allTrends=products.filter(p=>p.tendencia==='Em alta'||Number(p.vendas)>0).sort((a,b)=>(Number(b.vendas)||0)-(Number(a.vendas)||0));
+  $('trendList').innerHTML=allTrends.length?allTrends.map(productCard).join(''):'<div class="empty">Ainda não há produtos com vendas ou tendência informada.</div>';
+ }
+ if(isAdmin){
+  $('adminList').innerHTML=manualProducts.map(p=>{
+   const id=String(p.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+   return `<div class="row" style="justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:8px 0"><span>${esc(p.nome)}</span><span><button class="soft" onclick="editProduct('${id}')">Editar</button><button class="danger" onclick="deleteProduct('${id}')">Excluir</button></span></div>`;
+  }).join('')||'Nenhum produto manual cadastrado.';
+ }
+ renderTrialShowcase();
+}
+
 function clearFilters(){  
  $('q').value='';  
  $('commission').value='all';  
@@ -1227,7 +1254,8 @@ function editProduct(id){
  $('pcat').value=p.categoria||'Outros';  
  $('pdesc').value=p.descricao||'';  
  $('pprice').value=p.preco??'';  
- $('pcommission').value=p.comissao??'';  
+ $('pcommission').value=p.comissao??'';
+ $('pcommissionRate').value=p.taxa_comissao??p.taxaComissao??'';  
  $('psales').value=p.vendas??'';  
  $('paffiliates').value=p.concorrencia??'';  
  $('ptrend').value=p.tendencia||'Sem informação';  
@@ -1246,7 +1274,8 @@ async function saveProduct(e){
   categoria:$('pcat').value,  
   descricao:$('pdesc').value.trim()||null,  
   preco:$('pprice').value===''?null:Number($('pprice').value),  
-  comissao:Number($('pcommission').value),  
+  comissao:$('pcommission').value===''?null:Number($('pcommission').value),
+  taxa_comissao:$('pcommissionRate').value===''?null:Number($('pcommissionRate').value),  
   vendas:$('psales').value===''?null:Number($('psales').value),  
   concorrencia:$('paffiliates').value===''?null:$('paffiliates').value,  
   tendencia:$('ptrend').value,  
@@ -1449,33 +1478,30 @@ function showVideoPlaceholder(text){
  });  
 }  
   
-function displaySharedVideo(url,lockedPreview=false){
- ['videoPreview','heroVideo'].forEach(id=>{  
-  const box=$(id);  
-  if(!box)return;  
-  box.classList.toggle('video-locked-preview',lockedPreview);
-  if(lockedPreview){
-   box.innerHTML='<video playsinline preload="auto" muted tabindex="-1" aria-label="Prévia pausada do vídeo"></video><div class="video-lock-badge">🔒 Vídeo completo apenas para assinantes</div>';
-  }else{
-   box.innerHTML='<video controls playsinline preload="metadata"></video>';
+function displaySharedVideo(url,trialPreview=false){
+ ['videoPreview','heroVideo'].forEach(id=>{
+  const box=$(id);if(!box)return;
+  box.innerHTML='<video controls playsinline preload="metadata"></video>'+(trialPreview?'<div class="video-lock-badge">⏱️ Teste grátis: 1 minuto de vídeo</div>':'');
+  const video=box.querySelector('video');video.src=url;
+  if(trialPreview){
+   video.addEventListener('timeupdate',()=>{if(video.currentTime>=60){video.pause();video.currentTime=60;video.controls=false;const b=box.querySelector('.video-lock-badge');if(b)b.textContent='🔒 Limite de 1 minuto atingido. Assine para continuar.';}});
+   video.addEventListener('seeking',()=>{if(video.currentTime>60)video.currentTime=60;});
+   video.addEventListener('play',()=>{if(video.currentTime>=60)video.pause();});
   }
-  const video=box.querySelector('video');
-  video.src=url;
-  video.controls=!lockedPreview;
- });  
-}  
-  
+ });
+}
+
 async function loadSharedVideo(){  
- const lockedPreview=!isAdmin&&!hasActiveMembership;
- const{data,error}=await db.storage.from(VIDEO_BUCKET).createSignedUrl(VIDEO_PATH,lockedPreview?300:86400);
+ const trialPreview=!isAdmin&&hasTrialAccess&&!hasPaidMembership;
+ const{data,error}=await db.storage.from(VIDEO_BUCKET).createSignedUrl(VIDEO_PATH,trialPreview?300:86400);
   
  if(error){  
-  showVideoPlaceholder(lockedPreview?'Prévia do vídeo exclusiva para assinantes.':'O vídeo ainda não foi publicado pelo administrador.');
+  showVideoPlaceholder(trialPreview?'Prévia de 1 minuto do vídeo para o teste grátis.':'O vídeo ainda não foi publicado pelo administrador.');
   if(isAdmin)message('videoMessage','Não foi possível localizar o vídeo: '+error.message,'');  
   return;  
  }  
   
- displaySharedVideo(data.signedUrl,lockedPreview);
+ displaySharedVideo(data.signedUrl,trialPreview);
  if(isAdmin)message('videoMessage','Vídeo publicado e disponível para os assinantes ativos.','ok');  
 }  
   
