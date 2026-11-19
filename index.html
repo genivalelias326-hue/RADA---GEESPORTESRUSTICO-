@@ -5,7 +5,7 @@
 <meta charset="utf-8">  
 <meta name="viewport" content="width=device-width,initial-scale=1">  
 <meta name="theme-color" content="#10284f">  
-<title>RADAR GEESPORTESRÚSTICO</title>  
+<title>RADAR DE DICAS PARA VOCÊ COMEÇAR A VENDER</title>  
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  
 <style>  
 :root{--navy:#071a35;--blue:#087cf5;--orange:#ff8b24;--pink:#f52983;--bg:#061329;--ink:#f3f8ff;--muted:#b8c9df;--line:#174b7c;--green:#00d68f}  
@@ -146,7 +146,7 @@ main{padding:0 11px}
 <header>  
 <div class="head">  
 <div>  
-<div class="brand">RADAR <span>GEESPORTESRÚSTICO</span></div>  
+<div class="brand">RADAR <span>DE DICAS</span></div>  
 <div class="tag">INTELIGÊNCIA DE PRODUTOS PARA AFILIADOS</div>  
 </div>  
 <div class="row" style="margin:0;align-items:center">  
@@ -168,7 +168,7 @@ main{padding:0 11px}
 </div>  
 </div>  
 <div class="video" id="heroVideo">  
-<div class="video-placeholder">▶<b>MINHAS 10 DICAS PARA VENDER MAIS</b><small>O vídeo ficará disponível aqui para os assinantes ativos.</small></div>  
+<div class="video-placeholder">▶<b>10 DICAS PARA VENDER MAIS</b><small>O vídeo ficará disponível aqui para os assinantes ativos.</small></div>  
 </div>  
 </section>  <div class="notice" id="notice">  
 <b>Importante:</b> os dados de vendas, comissão e concorrência dependem das informações disponíveis. No teste grátis, a busca automática na Shopee fica bloqueada; os produtos demonstrativos são cadastrados pelo administrador. O Índice de Oportunidade é uma estimativa comparativa, não uma garantia de vendas.  
@@ -340,7 +340,7 @@ main{padding:0 11px}
 <div id="adminRequests"></div>  
 </div>  
 </section>  
-</div>  <div class="footer">RADAR GEESPORTESRÚSTICO • Dados exibidos dependem das informações cadastradas e de fontes autorizadas.</div>  
+</div>  <div class="footer">RADAR DE DICAS PARA VOCÊ COMEÇAR A VENDER • Dados exibidos dependem das informações cadastradas e de fontes autorizadas.</div>  
 </main>  <script>  
 const SUPABASE_URL='https://uwdhjiuufrsjqcbgtoyn.supabase.co';  
 const SUPABASE_ANON_KEY='sb_publishable_XZG-ucLX-b4eq7kCu-cfAA_JctKNxZY';  
@@ -641,9 +641,8 @@ async function loadSession(){
  $('authPanel').classList.add('hidden');  
  $('appArea').classList.remove('hidden');  
  $('accountButton').textContent='Trocar conta / sair';  
-  $('welcome').textContent=currentUser.email||'assinante';
-  
- isAdmin=currentUser.id===ADMIN_USER_ID;  
+  isAdmin=currentUser.id===ADMIN_USER_ID;
+ $('welcome').textContent=isAdmin?'Administrador':'Assinante';  
  $('adminTab').classList.toggle('hidden',!isAdmin);  
  $('videoAdminControls').classList.toggle('hidden',!isAdmin);  
   
@@ -1159,7 +1158,7 @@ async function toggleSave(id){
 /* COMPARTILHAMENTO */  
 async function shareRadar(){  
  const url=location.href;  
- const data={title:'RADAR GEESPORTESRÚSTICO',text:'Acesse o RADAR GEESPORTESRÚSTICO e confira oportunidades para afiliados!',url};  
+ const data={title:'RADAR DE DICAS',text:'RADAR DE DICAS — Para você começar a vender. Descubra oportunidades e encontre produtos para divulgar como afiliado.',url};  
  if(navigator.share){  
   try{await navigator.share(data)}catch(e){}  
  }else{  
@@ -1188,7 +1187,7 @@ async function shareProduct(id){
  const p=products.find(x=>String(x.id)===String(id));  
  if(!p)return;  
  const url=p.link_afiliado||p.link_produto||location.href;  
- const data={title:p.nome,text:'Confira este produto no RADAR GEESPORTESRÚSTICO: '+p.nome,url};  
+ const data={title:p.nome,text:'Confira este produto pelo RADAR DE DICAS: '+p.nome,url};  
   
  if(navigator.share){  
   try{await navigator.share(data)}catch(e){}  
@@ -1476,7 +1475,7 @@ const VIDEO_PATH='10-dicas-video';
 function showVideoPlaceholder(text){  
  ['videoPreview','heroVideo'].forEach(id=>{  
   const box=$(id);  
-  if(box)box.innerHTML='<div class="video-placeholder">▶<b>MINHAS 10 DICAS PARA VENDER MAIS</b><small>'+esc(text)+'</small></div>';  
+  if(box)box.innerHTML='<div class="video-placeholder">▶<b>10 DICAS PARA VENDER MAIS</b><small>'+esc(text)+'</small></div>';  
  });  
 }  
   
