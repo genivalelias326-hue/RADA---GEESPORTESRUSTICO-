@@ -51,12 +51,12 @@ main{max-width:1200px;margin:22px auto;padding:0 14px}
 .video-placeholder small{display:block;color:#b7c9e2}  
 .notice{margin:12px 0;padding:11px 13px;border-radius:14px;background:linear-gradient(135deg,#192d4a,#10233d);border:1px solid #d99e39;color:#ffe0a0;font-size:13px;line-height:1.4}  
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}  
-.stat{min-height:112px;background:linear-gradient(145deg,#0d2b50,#071a34);border:1px solid #078fff;border-radius:18px;padding:17px;box-shadow:inset 0 0 20px #087cff18,0 0 14px #007bff20}  
+.stat{cursor:pointer;text-align:left;width:100%;min-height:112px;background:linear-gradient(145deg,#0d2b50,#071a34);border:1px solid #078fff;border-radius:18px;padding:17px;box-shadow:inset 0 0 20px #087cff18,0 0 14px #007bff20}  
 .stat:nth-child(2){border-color:#f5a623}  
 .stat:nth-child(3){border-color:#00d68f}  
 .stat:nth-child(4){border-color:#ff5268}  
 .stat strong{font-size:30px;display:block;color:#fff}  
-.stat small{color:#c4d7ed;font-weight:700}  
+.stat small{color:#c4d7ed;font-weight:700}.stat:focus-visible{outline:3px solid #ffbd45;outline-offset:3px}  
 .tabs{display:flex;gap:9px;overflow-x:auto;padding:8px 2px 15px;scrollbar-width:thin}  
 .tabs button{flex:0 0 auto;white-space:nowrap;background:linear-gradient(145deg,#0d2c50,#071a34);color:#e8f4ff;border:1px solid #087ac4;border-radius:14px;padding:13px 17px}  
 .tabs button.active{background:linear-gradient(135deg,#ff8b24,#f52983);color:#fff;border-color:#ffb35c;box-shadow:0 0 18px #f5298355}  
@@ -197,13 +197,14 @@ main{padding:0 11px}
 </div>  
 <div id="appMessage" class="statusline"></div>  
 </div>  <section class="stats">  
-<div class="stat"><strong id="countProducts">0</strong><small>Produtos encontrados</small></div>  
-<div class="stat"><strong id="countHigh">0</strong><small>Comissão acima de 20%</small></div>  
-<div class="stat"><strong id="countNew">0</strong><small>NOVIDADES DETECTADAS PELO RADAR</small></div>  
-<div class="stat"><strong id="countChampions">0</strong><small>O QUE MAIS VENDE</small></div>  
+<button type="button" class="stat" onclick="openDashboardCard('produtos')"><strong id="countProducts">0</strong><small>Produtos encontrados</small></button>  
+<button type="button" class="stat" onclick="openDashboardCard('comissao')"><strong id="countHigh">0</strong><small>Comissão acima de 20%</small></button>  
+<button type="button" class="stat" onclick="openDashboardCard('novidades')"><strong id="countNew">0</strong><small>PRODUTO RECÉM-CHEGADO NA SHOPEE</small></button>  
+<button type="button" class="stat" onclick="openDashboardCard('mais_vende')"><strong id="countChampions">0</strong><small>O QUE MAIS VENDE</small></button>  
 </section>  <nav class="tabs">  
 <button class="active" data-tab="radar" onclick="showTab('radar')">🔎 Radar</button>  
 <button data-tab="mais" onclick="showTab('mais')">🏆 O que mais vende</button>  
+<button data-tab="novidades" onclick="showTab('novidades')">🆕 Produto recém-chegado na Shopee</button>  
 <button data-tab="tendencias" onclick="showTab('tendencias')">🔥 Melhor pra postar nesta semana</button>  
 <button data-tab="salvos" onclick="showTab('salvos')">⭐ Meus links</button>  
 <button data-tab="video" onclick="showTab('video')">🎥 Minhas dicas</button>  
@@ -259,6 +260,8 @@ main{padding:0 11px}
 <div id="searchMessage" class="statusline"></div>  
 </div>  
 <div id="productList" class="products"></div>  
+</section>  <section id="novidades" class="section">  
+<div class="panel"><h2>🆕 Produto recém-chegado na Shopee</h2><p class="muted">Produtos identificados pela primeira vez nas pesquisas do Radar.</p><div id="noveltyList" class="products"><div class="empty">Carregando novidades...</div></div></div>  
 </section>  <section id="mais" class="section">  
 <div class="panel">  
 <h2>🏆 O que mais vende</h2>  
@@ -591,8 +594,9 @@ function switchAccount(){
 }  
 
 
-function isPaidPlanName(plan){return ['mensal','anual','vitalicio','vitalício'].includes(String(plan||'').toLowerCase());}
-function isTrialPlanName(plan){const p=String(plan||'').toLowerCase();return p.includes('teste')||p.includes('gratis')||p.includes('grátis')||p.includes('trial');}
+function normalizedPlanName(plan){return String(plan||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+function isPaidPlanName(plan){return ['mensal','anual','vitalicio'].includes(normalizedPlanName(plan));}
+function isTrialPlanName(plan){const p=normalizedPlanName(plan);return p.includes('teste')||p.includes('gratis')||p.includes('trial');}
 function validUntil(date){return !date||new Date(date).getTime()>Date.now();}
 function competitionLevel(value){
  const n=numericValue(value); if(n===null)return 'Sem dados';
@@ -607,7 +611,7 @@ function renderTrialShowcase(){
  const top=[...source].sort((a,b)=>(Number(b.vendas)||0)-(Number(a.vendas)||0));
  const hot=source.filter(p=>String(p.tendencia||'').toLowerCase()==='em alta').sort((a,b)=>(Number(b.vendas)||0)-(Number(a.vendas)||0)).slice(0,10);
  const commission=source.filter(p=>Number(p.taxa_comissao??p.taxaComissao)>20).sort((a,b)=>(Number(b.taxa_comissao??b.taxaComissao)||0)-(Number(a.taxa_comissao??a.taxaComissao)||0)).slice(0,5);
- const low=source.filter(p=>competitionLevel(p.concorrencia)==='Baixa').sort((a,b)=>(Number(a.concorrencia)||0)-(Number(b.concorrencia)||0));
+ const low=source.filter(p=>numericValue(p.concorrencia)!==null&&numericValue(p.concorrencia)<10).sort((a,b)=>numericValue(a.concorrencia)-numericValue(b.concorrencia));
  $('bestList').innerHTML=top.length?top.map(productCard).join(''):'<div class="empty">Cadastre produtos demonstrativos no Radar.</div>';
  $('trendList').innerHTML=hot.length?hot.map(productCard).join(''):'<div class="empty">Marque até 10 produtos como “Em alta” no cadastro.</div>';
  $('weeklyRecommendations').innerHTML=top.slice(0,1).map(p=>`<div class="recommendation-item">${p.imagem_url?`<img src="${esc(p.imagem_url)}" alt="${esc(p.nome)}">`:''}<strong>${esc(p.nome)}</strong><small>Exemplo de postagem</small><p class="muted">Demonstração cadastrada pelo administrador.</p></div>`).join('')||'<div class="empty">Nenhum produto demonstrativo cadastrado.</div>';
@@ -630,67 +634,24 @@ function updateLockedContentLabels(){
  if(trendsTitle)trendsTitle.textContent=locked?'Destaque da semana — apenas para assinantes':'🔥 Melhor pra postar nesta semana';
 }
   
-async function loadSession(){  
- const{data:{session}}=await db.auth.getSession();  
-  
- if(!session){  
-  currentUser=null;  
-  isAdmin=false;  
-  hasActiveMembership=false;  
-  $('authPanel').classList.remove('hidden');  
-  $('appArea').classList.add('hidden');  
-  $('accountButton').textContent='Entrar / trocar conta';  
-  return;  
- }  
-  
- currentUser=session.user;  
- $('authPanel').classList.add('hidden');  
- $('appArea').classList.remove('hidden');  
- $('accountButton').textContent='Trocar conta / sair';  
-  isAdmin=currentUser.id===ADMIN_USER_ID;
- $('welcome').textContent=isAdmin?'Administrador':'Assinante';  
- $('adminTab').classList.toggle('hidden',!isAdmin);  
- $('videoAdminControls').classList.toggle('hidden',!isAdmin);  
-  
-  const{data:paidMember,error:paidErr}=await db.from('radar_assinaturas')
-   .select('plano,status,fim_periodo')
-   .eq('user_id',currentUser.id)
-   .maybeSingle();
+async function loadSession(){
+ const{data:{session}}=await db.auth.getSession();
+ if(!session){currentUser=null;isAdmin=false;hasActiveMembership=false;hasPaidMembership=false;hasTrialAccess=false;$('authPanel').classList.remove('hidden');$('appArea').classList.add('hidden');$('accountButton').textContent='Entrar / trocar conta';return;}
+ currentUser=session.user;$('authPanel').classList.add('hidden');$('appArea').classList.remove('hidden');$('accountButton').textContent='Trocar conta / sair';
+ isAdmin=currentUser.id===ADMIN_USER_ID;$('welcome').textContent=isAdmin?'Administrador':'Assinante';$('adminTab').classList.toggle('hidden',!isAdmin);$('videoAdminControls').classList.toggle('hidden',!isAdmin);
+ const{data:paidMember,error:paidErr}=await db.from('radar_assinaturas').select('plano,status,fim_periodo').eq('user_id',currentUser.id).maybeSingle();
+ const{data:member,error:mErr}=await db.from('assinantes').select('plano,status,data_expiracao').eq('user_id',currentUser.id).maybeSingle();
+ const paidCurrent=!!paidMember&&paidMember.status==='active'&&isPaidPlanName(paidMember.plano)&&validUntil(paidMember.fim_periodo);
+ const legacyPaidCurrent=!mErr&&!!member&&member.status==='ativo'&&isPaidPlanName(member.plano)&&validUntil(member.data_expiracao);
+ const trialCurrent=(!!paidMember&&paidMember.status==='active'&&isTrialPlanName(paidMember.plano)&&validUntil(paidMember.fim_periodo))||(!mErr&&!!member&&member.status==='ativo'&&isTrialPlanName(member.plano)&&validUntil(member.data_expiracao));
+ hasPaidMembership=paidCurrent||legacyPaidCurrent;hasTrialAccess=!hasPaidMembership&&trialCurrent;hasActiveMembership=isAdmin||hasPaidMembership||hasTrialAccess;
+ $('searchShopeeButton').disabled=!(isAdmin||hasPaidMembership);$('searchShopeeButton').textContent=(isAdmin||hasPaidMembership)?'🔎 BUSCAR NA SHOPEE':'🔒 BUSCA DISPONÍVEL APÓS ASSINAR';updateLockedContentLabels();
+ const accessMember=paidCurrent?paidMember:member;$('membership').textContent=isAdmin?'Acesso administrativo':hasPaidMembership&&accessMember?('Plano: '+accessMember.plano+' • Status: '+accessMember.status):hasTrialAccess?'Plano: teste grátis • acesso demonstrativo':'Nenhuma assinatura ativa';
+ if(paidErr)console.warn('Consulta de assinatura atual:',paidErr);if(mErr)console.warn('Consulta de assinatura legada:',mErr);
+ message('appMessage',isAdmin?'Acesso administrativo completo.':hasPaidMembership?'Assinatura paga ativa: todos os recursos liberados.':hasTrialAccess?'Teste grátis ativo: demonstrações limitadas por 7 dias.':'Bem-vindo ao RADAR! Escolha um plano para liberar os recursos completos.','ok');
+ await loadProducts();if(isAdmin||hasPaidMembership)await loadSaved();else{saved=[];renderSaved();}await loadDashboardStats();await loadRadarNoveltyCount();await loadSharedVideo();if(isAdmin)await loadAdminRequests();
+}
 
-  const paidIsCurrent=!!paidMember&&paidMember.status==='active'&&
-   (!paidMember.fim_periodo||new Date(paidMember.fim_periodo).getTime()>Date.now());
-
-  const{data:member,error:mErr}=await db.from('assinantes')  
-  .select('plano,status,data_expiracao')  
-  .eq('user_id',currentUser.id)  
-  .maybeSingle();  
-  
-  hasActiveMembership=isAdmin||paidIsCurrent||(!mErr&&!!member&&member.status==='ativo');  
-  $('searchShopeeButton').disabled=!hasActiveMembership;
-  $('searchShopeeButton').textContent=hasActiveMembership?'🔎 BUSCAR NA SHOPEE':'🔒 BUSCA DISPONÍVEL APÓS ATIVAR O PLANO';
-  updateLockedContentLabels();
-  
- if(mErr){  
-   console.error('Erro ao consultar plano legado:',mErr);
-   message('appMessage',isAdmin?'Não foi possível consultar o plano: '+mErr.message:'Bem-vindo ao RADAR! Escolha um plano para liberar os recursos.','ok');
- }else{  
-   const accessMember=paidIsCurrent?paidMember:member;
-   $('membership').textContent=accessMember?('Plano: '+accessMember.plano+' • Status: '+accessMember.status):hasTrialAccess?'Plano: teste grátis • acesso demonstrativo':'Cadastro de assinante ainda não localizado';  
-    message('appMessage',hasTrialAccess?'Teste grátis ativo: demonstrações limitadas por 7 dias.':(!isAdmin&&!hasPaidMembership?'Bem-vindo ao RADAR! Escolha um plano para liberar a busca Shopee.':'Bem-vindo ao RADAR! Acesso completo liberado.'),'ok');
- }  
-  
- await loadProducts();  
-  if(isAdmin||hasActiveMembership){
-   await loadSaved();
-  }else{
-   saved=[];
-   renderSaved();
-  }
-  await loadDashboardStats();
- await loadSharedVideo();  
- if(isAdmin)await loadAdminRequests();  
-}  
-  
 /* CARREGAMENTO DOS PRODUTOS MANUAIS */  
 async function loadProducts(){  
  const productFields='*';
@@ -761,8 +722,8 @@ async function searchShopee(){
   message('searchMessage','Entre na sua conta para pesquisar.','error');  
   return;  
  }  
- if(!hasActiveMembership){  
-  message('searchMessage','Seu plano ainda não está ativo. Aguarde a liberação do administrador.','error');  
+ if(!isAdmin&&!hasPaidMembership){  
+  message('searchMessage','A busca automática na Shopee está disponível para assinantes pagos ativos.','error');  
   return;  
  }  
   
@@ -1065,7 +1026,7 @@ function renderDemandRadar(){
     <span class="pill hot">#${i+1} DESTAQUE</span>  
     <strong>${esc(p.nome)}</strong>  
     <small>🔥 ${Number(p.vendas).toLocaleString('pt-BR')} vendas informadas</small>
-    <div style="margin-top:9px">${!isAdmin&&!hasActiveMembership?'<button class="primary" disabled>🔒 Ative um plano para abrir</button>':`<button class="primary" onclick="openLink('${String(p.id).replace(/'/g,"\\'")}')">Ver produto</button>`}</div>
+    <div style="margin-top:9px">${!isAdmin&&!hasPaidMembership?'<button class="primary" disabled>🔒 Ative um plano para abrir</button>':`<button class="primary" onclick="openLink('${String(p.id).replace(/'/g,"\\'")}')">Ver produto</button>`}</div>
    </div>`).join('')  
   :(!isAdmin&&!hasActiveMembership
     ?'<div class="empty" style="grid-column:1/-1">Destaque da semana — conteúdo apenas para assinantes.</div>'
@@ -1138,9 +1099,26 @@ function showTab(id){
  window.scrollTo({top:document.querySelector('.tabs').offsetTop-8,behavior:'smooth'});  
 }  
   
+/* ATALHOS DOS QUATRO INDICADORES */
+async function openDashboardCard(kind){
+ if(!currentUser){$('authPanel').classList.remove('hidden');$('authPanel').scrollIntoView({behavior:'smooth',block:'start'});return;}
+ if(!isAdmin&&!hasPaidMembership){alert('Os indicadores completos ficam disponíveis após a confirmação de uma assinatura paga.');showTab('planos');return;}
+ if(kind==='novidades'){showTab('novidades');await loadRadarNovelties();return;}
+ showTab(kind==='mais_vende'?'mais':'radar');
+ if(kind==='comissao'){$('commission').value='20';$('q').value='';$('competition').value='all';$('category').value='all';renderProducts();}
+ else if(kind==='produtos')clearFilters();
+}
+async function loadRadarNovelties(){
+ const target=$('noveltyList');if(!target)return;
+ const{data,error}=await db.from('radar_novidades').select('item_id,product_name,image_url,first_search').limit(60);
+ if(error){console.error('Erro ao carregar novidades:',error);target.innerHTML='<div class="empty">Não foi possível carregar as novidades: '+esc(error.message)+'</div>';return;}
+ const rows=data||[];
+ target.innerHTML=rows.length?rows.map(p=>`<article class="product">${p.image_url?`<img src="${esc(p.image_url)}" alt="${esc(p.product_name)}" loading="lazy">`:''}<span class="pill good">NOVO NO HISTÓRICO DO RADAR</span><h3>${esc(p.product_name||'Produto Shopee')}</h3><p class="muted">Primeira busca registrada: ${esc(p.first_search||'Não informada')}</p><small class="muted">ID do produto: ${esc(p.item_id)}</small></article>`).join(''):'<div class="empty">Ainda não há produtos recém-chegados registrados. Faça uma busca na Shopee para identificar novidades.</div>';
+}
+
 /* SALVAR PRODUTOS */  
 async function toggleSave(id){  
- if(!isAdmin&&!hasActiveMembership){alert('Ative um plano para salvar produtos.');return;}
+ if(!isAdmin&&!hasPaidMembership){alert('Ative uma assinatura paga para salvar produtos.');return;}
  const p=manualProducts.find(x=>String(x.id)===String(id));  
  if(!p||!currentUser)return;  
  const old=saved.find(s=>String(s.produto_id)===String(id));  
@@ -1189,7 +1167,7 @@ async function copyRadarLink(){
 }  
   
 async function shareProduct(id){  
- if(!isAdmin&&!hasActiveMembership){alert('Ative um plano para compartilhar produtos.');return;}
+ if(!isAdmin&&!hasPaidMembership){alert('Ative uma assinatura paga para compartilhar produtos.');return;}
  const p=products.find(x=>String(x.id)===String(id));  
  if(!p)return;  
  const url=p.link_afiliado||p.link_produto||location.href;  
@@ -1208,7 +1186,7 @@ async function shareProduct(id){
 }  
   
 function openLink(id){  
- if(!isAdmin&&!hasActiveMembership){alert('Ative um plano para abrir os links dos produtos.');return;}
+ if(!isAdmin&&!hasPaidMembership){alert('Ative uma assinatura paga para abrir os links dos produtos.');return;}
  const p=products.find(x=>String(x.id)===String(id));  
  const url=p&&(p.link_afiliado||p.link_produto);  
  if(url)window.open(url,'_blank','noopener,noreferrer');  
@@ -1217,22 +1195,22 @@ function openLink(id){
   
 /* LINKS SALVOS */  
 function renderSaved(){  
- $('savedList').innerHTML=(!isAdmin&&!hasActiveMembership)?'<div class="empty">Links salvos — conteúdo apenas para assinantes.</div>':saved.length?saved.map(s=>`
+ $('savedList').innerHTML=(!isAdmin&&!hasPaidMembership)?'<div class="empty">Links salvos — disponível para assinantes pagos.</div>':saved.length?saved.map(s=>`
  <div class="row" style="justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:9px 0">  
   <div>  
    <b>${esc(s.titulo)}</b>  
-  <div class="muted" style="font-size:12px;word-break:break-all">${!isAdmin&&!hasActiveMembership?'Link oculto até ativar o plano':esc(s.url)}</div>
+  <div class="muted" style="font-size:12px;word-break:break-all">${!isAdmin&&!hasPaidMembership?'Link oculto até ativar o plano':esc(s.url)}</div>
   </div>  
   <div>  
-    ${!isAdmin&&!hasActiveMembership?'<button class="primary" disabled>🔒 Abrir após ativar o plano</button>':`<button class="primary" onclick="window.open('${esc(s.url)}','_blank','noopener,noreferrer')">Abrir</button>`}
-    ${!isAdmin&&!hasActiveMembership?'<button class="danger" disabled>Remover</button>':`<button class="danger" onclick="removeSaved('${s.id}')">Remover</button>`}
+    ${!isAdmin&&!hasPaidMembership?'<button class="primary" disabled>🔒 Abrir após ativar o plano</button>':`<button class="primary" onclick="window.open('${esc(s.url)}','_blank','noopener,noreferrer')">Abrir</button>`}
+    ${!isAdmin&&!hasPaidMembership?'<button class="danger" disabled>Remover</button>':`<button class="danger" onclick="removeSaved('${s.id}')">Remover</button>`}
   </div>  
  </div>  
  `).join(''):'<div class="empty">Você ainda não salvou links.</div>';  
 }  
   
 async function removeSaved(id){  
- if(!isAdmin&&!hasActiveMembership){alert('Ative um plano para usar seus links salvos.');return;}
+ if(!isAdmin&&!hasPaidMembership){alert('Ative uma assinatura paga para usar seus links salvos.');return;}
  const{error}=await db.from('links_salvos').delete().eq('id',id).eq('user_id',currentUser.id);  
  if(error){alert(error.message);return;}  
  await loadSaved();  
@@ -1559,7 +1537,9 @@ db.auth.onAuthStateChange((_event,session)=>{
  }else{  
   currentUser=null;  
   isAdmin=false;  
-  hasActiveMembership=false;  
+  hasActiveMembership=false;
+  hasPaidMembership=false;
+  hasTrialAccess=false;
   products=[];  
   manualProducts=[];  
   shopeeProducts=[];  
