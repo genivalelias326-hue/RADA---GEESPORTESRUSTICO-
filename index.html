@@ -122,9 +122,9 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#19bfff;box-sh
 .opportunity-track{height:8px;background:#061329;border-radius:20px;overflow:hidden;margin-top:8px}  
 .opportunity-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,#ff8b24,#f52983)}  
 .opportunity-note{font-size:10px;color:#a9c0d9;margin-top:7px;line-height:1.4}  
-.shopee-import{border:1px solid #2788bf;background:linear-gradient(135deg,#102f50,#0a1d36);border-radius:14px;padding:14px;margin:12px 0}  
+.content-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.content-card{background:#0b2543;border:1px solid #28618e;border-radius:14px;padding:14px;margin:9px 0}.content-card h3{margin:5px 0}.content-card video{width:100%;max-height:340px;background:#000;border-radius:10px}.content-card pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;color:#dcecff}.shopee-import{border:1px solid #2788bf;background:linear-gradient(135deg,#102f50,#0a1d36);border-radius:14px;padding:14px;margin:12px 0}  
 .shopee-import label{font-size:13px;font-weight:850;display:block;margin-bottom:8px}  
-@media(max-width:760px){  
+@media(max-width:760px){.content-grid{grid-template-columns:1fr}  
 .head{align-items:flex-start;flex-direction:column}  
 header .row{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}  
 header button{font-size:12px;padding:11px 8px}  
@@ -177,7 +177,7 @@ main{padding:0 11px}
 <div class="video-placeholder">▶<b>10 DICAS PARA VENDER MAIS</b><small>O vídeo ficará disponível aqui para os assinantes ativos.</small></div>  
 </div>  
 </section>  <div class="notice" id="notice">  
-<b>Importante:</b> os dados de vendas, comissão e concorrência dependem das informações disponíveis. No teste grátis, a busca automática na Shopee fica bloqueada; os produtos demonstrativos são cadastrados pelo administrador. O Índice de Oportunidade é uma estimativa comparativa, não uma garantia de vendas.  
+<b>Importante:</b> os dados de vendas, comissão e concorrência dependem das informações disponíveis. No teste grátis, a busca automática na Shopee fica bloqueada; os produtos demonstrativos são cadastrados pelo administrador. O Radar atualiza os dados sincronizados a cada 6 horas quando a rotina de integração estiver configurada. O Índice de Oportunidade é uma estimativa, não garantia de vendas.  
 </div>  <section class="authbox panel" id="authPanel">  
 <h2>Acesse sua conta</h2>  
 <p class="muted">Entre ou crie seu cadastro para acessar o Radar.</p>  
@@ -199,12 +199,12 @@ main{padding:0 11px}
 </div>  <section class="stats">  
 <button type="button" class="stat" onclick="openDashboardCard('produtos')"><strong id="countProducts">0</strong><small>Produtos encontrados</small></button>  
 <button type="button" class="stat" onclick="openDashboardCard('comissao')"><strong id="countHigh">0</strong><small>Comissão acima de 20%</small></button>  
-<button type="button" class="stat" onclick="openDashboardCard('novidades')"><strong id="countNew">0</strong><small>PRODUTO RECÉM-CHEGADO NA SHOPEE</small></button>  
+<button type="button" class="stat" onclick="openDashboardCard('semvendas')"><strong id="countNew">0</strong><small>PRODUTOS SEM VENDAS NA SHOPEE</small></button>  
 <button type="button" class="stat" onclick="openDashboardCard('mais_vende')"><strong id="countChampions">0</strong><small>O QUE MAIS VENDE</small></button>  
 </section>  <nav class="tabs">  
 <button class="active" data-tab="radar" onclick="showTab('radar')">🔎 Radar</button>  
 <button data-tab="mais" onclick="showTab('mais')">🏆 O que mais vende</button>  
-<button data-tab="novidades" onclick="showTab('novidades')">🆕 Produto recém-chegado na Shopee</button>  
+<button data-tab="semvendas" onclick="showTab('semvendas')">🆕 Produtos sem vendas na Shopee</button>  
 <button data-tab="tendencias" onclick="showTab('tendencias')">🔥 Melhor pra postar nesta semana</button>  
 <button data-tab="salvos" onclick="showTab('salvos')">⭐ Meus links</button>  
 <button data-tab="video" onclick="showTab('video')">🎥 Minhas dicas</button>  
@@ -232,8 +232,8 @@ main{padding:0 11px}
 <p class="demand-subtitle">Produtos com vendas informadas e boas oportunidades para divulgar. Confira os resultados antes de escolher o que postar.</p>  
 <div id="weeklyRecommendations" class="recommendation-list"></div>  
 </div>
-<div class="panel"><h2>💰 Produto com comissão acima dos 20%</h2><p class="muted">Produtos selecionados com comissão superior a 20%.</p><div id="commissionDemo" class="products"></div></div>
-<div class="panel"><h2>🎯 Camada concorrência — Afiliados divulgando</h2><p class="muted">Nível de concorrência baseado na quantidade de afiliados que já estão divulgando o produto.</p><div id="competitionDemo" class="products"></div></div>
+<div class="panel"><h2>📋 LISTA DE PROMPT PARA VOCÊ CRIAR VÍDEOS VIRAIS</h2><p class="muted">Prompts prontos para copiar e usar na criação dos seus vídeos.</p><div id="promptsAccess" class="content-grid"></div></div>
+<div class="panel"><h2>🎬 DICAS DE COMO CRIAR VÍDEO UGC E POV ULTRA-REALISTA</h2><p class="muted">Biblioteca de vídeos e tutoriais para aprender a produzir conteúdo UGC e POV.</p><div id="tutorialsAccess" class="content-grid"></div></div>
 <div class="panel">  
 <h2>Buscar oportunidades</h2>  
 <p class="muted">Digite o nome do produto e clique em Buscar na Shopee para consultar as ofertas disponíveis.</p>  
@@ -260,8 +260,8 @@ main{padding:0 11px}
 <div id="searchMessage" class="statusline"></div>  
 </div>  
 <div id="productList" class="products"></div>  
-</section>  <section id="novidades" class="section">  
-<div class="panel"><h2>🆕 Produto recém-chegado na Shopee</h2><p class="muted">Produtos identificados pela primeira vez nas pesquisas do Radar.</p><div id="noveltyList" class="products"><div class="empty">Carregando novidades...</div></div></div>  
+</section>  <section id="semvendas" class="section">
+<div class="panel"><h2>🆕 Produtos sem vendas na Shopee</h2><p class="muted">Produtos cadastrados com zero vendas confirmadas. Itens sem retorno de vendas ficam separados como aguardando sincronização.</p><div id="zeroSalesList" class="products"><div class="empty">Carregando produtos...</div></div><h3 style="margin-top:20px">Aguardando sincronização</h3><div id="unknownSalesList" class="products"></div></div>
 </section>  <section id="mais" class="section">  
 <div class="panel">  
 <h2>🏆 O que mais vende</h2>  
@@ -321,7 +321,7 @@ main{padding:0 11px}
 </div>  
 <div id="shopeeProductMessage" class="statusline"></div>  
 </div>  <form id="productForm" onsubmit="saveProduct(event)">  
-<input type="hidden" id="editId">  
+<input type="hidden" id="editId"><input type="hidden" id="pshopId"><input type="hidden" id="pitemId">  
 <div class="formgrid">  
 <label>Nome do produto<input required id="pname"></label>  
 <label>Categoria<select id="pcat"><option>Pet</option><option>Cozinha</option><option>Moda</option><option>Acessórios</option><option>Casa</option><option>Tech</option><option>Infantil</option><option>Fitness</option><option>Saúde</option><option>Eletrônicos</option><option>Esportes</option><option>Beleza</option><option>Outros</option></select></label>  
@@ -343,6 +343,8 @@ main{padding:0 11px}
 </form>  
 </div>  
 <div class="panel"><h2>Gerenciar produtos</h2><div id="adminList"></div></div>  
+<div class="panel"><h2>Gerenciar prompts virais</h2><p class="muted">Somente o administrador pode cadastrar, editar e excluir.</p><form id="promptForm" onsubmit="savePrompt(event)"><input type="hidden" id="promptEditId"><div class="formgrid"><label>Título<input id="promptTitle" required></label><label>Categoria<input id="promptCategory" placeholder="Ex.: UGC, POV, demonstração"></label><label class="wide">Prompt completo<textarea id="promptContent" rows="5" required></textarea></label></div><div class="row"><button class="primary" type="submit">Salvar prompt</button><button class="soft" type="button" onclick="clearPromptForm()">Limpar</button></div></form><div id="adminPrompts"></div></div>
+<div class="panel"><h2>Gerenciar vídeos UGC e POV</h2><p class="muted">Envie vídeos para a biblioteca paga. Esta biblioteca é separada do vídeo antigo das 10 dicas.</p><form id="tutorialForm" onsubmit="saveTutorial(event)"><input type="hidden" id="tutorialEditId"><div class="formgrid"><label>Título<input id="tutorialTitle" required></label><label>Ordem<input id="tutorialOrder" type="number" min="0" value="0"></label><label class="wide">Descrição<textarea id="tutorialDescription" rows="3"></textarea></label><label class="wide">Arquivo de vídeo<input id="tutorialFile" type="file" accept="video/*"></label></div><div class="row"><button class="primary" type="submit">Salvar vídeo</button><button class="soft" type="button" onclick="clearTutorialForm()">Limpar</button></div></form><div id="adminTutorials"></div></div>
 <div class="panel">  
 <h2>Solicitações de plano</h2>  
 <p class="muted">Pagamentos aprovados são registrados em radar_assinaturas. A lista administrativa abaixo continua exibindo os cadastros legados da tabela assinantes.</p>  
@@ -365,7 +367,9 @@ let products=[];
 let manualProducts=[];  
 let shopeeProducts=[];  
 let saved=[];  
-let radarNoveltyCount=0;  
+let radarNoveltyCount=0;
+let promptRows=[];
+let tutorialRows=[];  
   
 const $=id=>document.getElementById(id);  
   
@@ -615,8 +619,7 @@ function renderTrialShowcase(){
  $('bestList').innerHTML=top.length?top.map(productCard).join(''):'<div class="empty">Cadastre produtos demonstrativos no Radar.</div>';
  $('trendList').innerHTML=hot.length?hot.map(productCard).join(''):'<div class="empty">Marque até 10 produtos como “Em alta” no cadastro.</div>';
  $('weeklyRecommendations').innerHTML=top.slice(0,1).map(p=>`<div class="recommendation-item">${p.imagem_url?`<img src="${esc(p.imagem_url)}" alt="${esc(p.nome)}">`:''}<strong>${esc(p.nome)}</strong><small>Exemplo de postagem</small><p class="muted">Demonstração cadastrada pelo administrador.</p></div>`).join('')||'<div class="empty">Nenhum produto demonstrativo cadastrado.</div>';
- $('commissionDemo').innerHTML=commission.length?commission.map(productCard).join(''):'<div class="empty">Cadastre a taxa de comissão acima de 20% para exibir até 5 produtos.</div>';
- $('competitionDemo').innerHTML=low.length?low.map(productCard).join(''):'<div class="empty">Ainda não há dados suficientes para identificar baixa concorrência.</div>';
+
 }
 
 function updateLockedContentLabels(){
@@ -649,7 +652,7 @@ async function loadSession(){
  const accessMember=paidCurrent?paidMember:member;$('membership').textContent=isAdmin?'Acesso administrativo':hasPaidMembership&&accessMember?('Plano: '+accessMember.plano+' • Status: '+accessMember.status):hasTrialAccess?'Plano: teste grátis • acesso demonstrativo':'Nenhuma assinatura ativa';
  if(paidErr)console.warn('Consulta de assinatura atual:',paidErr);if(mErr)console.warn('Consulta de assinatura legada:',mErr);
  message('appMessage',isAdmin?'Acesso administrativo completo.':hasPaidMembership?'Assinatura paga ativa: todos os recursos liberados.':hasTrialAccess?'Teste grátis ativo: demonstrações limitadas por 7 dias.':'Bem-vindo ao RADAR! Escolha um plano para liberar os recursos completos.','ok');
- await loadProducts();if(isAdmin||hasPaidMembership)await loadSaved();else{saved=[];renderSaved();}await loadDashboardStats();await loadRadarNoveltyCount();await loadSharedVideo();if(isAdmin)await loadAdminRequests();
+ await loadProducts();await loadZeroSalesProducts();if(isAdmin||hasPaidMembership)await loadSaved();else{saved=[];renderSaved();}await loadDashboardStats();await loadRadarNoveltyCount();await loadSharedVideo();await loadPaidLibraries();if(isAdmin){await loadAdminRequests();}
 }
 
 /* CARREGAMENTO DOS PRODUTOS MANUAIS */  
@@ -671,11 +674,13 @@ async function loadProducts(){
  products=[...shopeeProducts,...manualProducts];  
  renderProducts();
  renderTrialShowcase();
+ if($("zeroSalesList"))loadZeroSalesProducts();
 }  
   
 /* NORMALIZAÇÃO DOS RESULTADOS DA SHOPEE */  
 function normalizeShopeeProduct(p,index=0){  
- const rawItemId=p.itemId??p.item_id??p.productId??p.product_id??null;  
+ const rawItemId=p.itemId??p.item_id??p.productId??p.product_id??null;
+ const rawShopId=p.shopId??p.shop_id??null;  
  const hasStableItemId=rawItemId!==null&&rawItemId!==undefined&&String(rawItemId).trim()!=='';  
  const itemId=hasStableItemId?rawItemId:'sem-id-'+index;  
  const commissionValue=numericValue(p.commission);  
@@ -708,7 +713,8 @@ function normalizeShopeeProduct(p,index=0){
   link_afiliado:affiliateLink,  
   link_produto:productLink||affiliateLink,  
   origem:'shopee',  
-  itemId:rawItemId,  
+  itemId:rawItemId,
+  shopId:rawShopId,
   hasStableItemId,  
   loja:shopName,  
   taxaComissao:commissionRate,  
@@ -856,7 +862,9 @@ async function fetchShopeeProduct(){
   $('ptrend').value='Sem informação';  
   $('pimage').value=normalized.imagem_url||'';  
   $('plink').value=normalized.link_produto||url;  
-  $('paffiliate').value=normalized.link_afiliado||'';  
+  $('paffiliate').value=normalized.link_afiliado||'';
+  $('pshopId').value=normalized.shopId||'';
+  $('pitemId').value=normalized.itemId||'';
   $('editId').value='';  
   
   message(  
@@ -1103,18 +1111,12 @@ function showTab(id){
 async function openDashboardCard(kind){
  if(!currentUser){$('authPanel').classList.remove('hidden');$('authPanel').scrollIntoView({behavior:'smooth',block:'start'});return;}
  if(!isAdmin&&!hasPaidMembership){alert('Os indicadores completos ficam disponíveis após a confirmação de uma assinatura paga.');showTab('planos');return;}
- if(kind==='novidades'){showTab('novidades');await loadRadarNovelties();return;}
+ if(kind==='semvendas'){showTab('semvendas');await loadZeroSalesProducts();return;}
  showTab(kind==='mais_vende'?'mais':'radar');
  if(kind==='comissao'){$('commission').value='20';$('q').value='';$('competition').value='all';$('category').value='all';renderProducts();}
  else if(kind==='produtos')clearFilters();
 }
-async function loadRadarNovelties(){
- const target=$('noveltyList');if(!target)return;
- const{data,error}=await db.from('radar_novidades').select('item_id,product_name,image_url,first_search').limit(60);
- if(error){console.error('Erro ao carregar novidades:',error);target.innerHTML='<div class="empty">Não foi possível carregar as novidades: '+esc(error.message)+'</div>';return;}
- const rows=data||[];
- target.innerHTML=rows.length?rows.map(p=>`<article class="product">${p.image_url?`<img src="${esc(p.image_url)}" alt="${esc(p.product_name)}" loading="lazy">`:''}<span class="pill good">NOVO NO HISTÓRICO DO RADAR</span><h3>${esc(p.product_name||'Produto Shopee')}</h3><p class="muted">Primeira busca registrada: ${esc(p.first_search||'Não informada')}</p><small class="muted">ID do produto: ${esc(p.item_id)}</small></article>`).join(''):'<div class="empty">Ainda não há produtos recém-chegados registrados. Faça uma busca na Shopee para identificar novidades.</div>';
-}
+async function loadRadarNovelties(){ return loadZeroSalesProducts(); }
 
 /* SALVAR PRODUTOS */  
 async function toggleSave(id){  
@@ -1219,7 +1221,8 @@ async function removeSaved(id){
 /* ADMINISTRAÇÃO DE PRODUTOS */  
 function clearProductForm(){  
  $('productForm').reset();  
- $('editId').value='';  
+ $('editId').value='';
+ $('pshopId').value='';$('pitemId').value='';
  $('shopeeProductUrl').value='';  
  message('shopeeProductMessage','');  
 }  
@@ -1246,7 +1249,9 @@ function editProduct(id){
  $('ptrend').value=p.tendencia||'Sem informação';  
  $('pimage').value=p.imagem_url||'';  
  $('plink').value=p.link_produto||'';  
- $('paffiliate').value=p.link_afiliado||'';  
+ $('paffiliate').value=p.link_afiliado||'';
+ $('pshopId').value=p.shop_id||'';
+ $('pitemId').value=p.item_id||'';
  $('productForm').scrollIntoView({behavior:'smooth',block:'start'});  
 }  
   
@@ -1266,7 +1271,9 @@ async function saveProduct(e){
   tendencia:$('ptrend').value,  
   imagem_url:$('pimage').value.trim()||null,  
   link_produto:$('plink').value.trim()||null,  
-  link_afiliado:$('paffiliate').value.trim()||null,  
+  link_afiliado:$('paffiliate').value.trim()||null,
+  shop_id:$('pshopId').value.trim()||null,
+  item_id:$('pitemId').value.trim()||null,
   ativo:true  
  };  
   
@@ -1454,7 +1461,9 @@ async function setMember(id,status){
   
 /* VÍDEO */  
 const VIDEO_BUCKET='videos-radar';  
-const VIDEO_PATH='10-dicas-video';  
+const VIDEO_PATH='10-dicas-video';
+const UGC_BUCKET='radar-ugc-videos';
+const SYNC_INTERVAL_LABEL='6 horas';  
   
 function showVideoPlaceholder(text){  
  ['videoPreview','heroVideo'].forEach(id=>{  
@@ -1530,6 +1539,55 @@ async function removeVideo(){
  $('videoFile').value='';  
 }  
   
+
+/* BIBLIOTECAS PAGAS: PROMPTS E VÍDEOS UGC/POV */
+function canReadPaidLibrary(){return !!(isAdmin||hasPaidMembership);}
+function paidLockMarkup(){return '<div class="empty">🔒 Conteúdo exclusivo para assinantes dos planos mensal, anual e vitalício. O teste grátis não inclui esta biblioteca.</div>';}
+async function loadPaidLibraries(){
+ const prompts=$('promptsAccess'), tutorials=$('tutorialsAccess');
+ if(!canReadPaidLibrary()){
+  if(prompts)prompts.innerHTML=paidLockMarkup();if(tutorials)tutorials.innerHTML=paidLockMarkup();
+  if(isAdmin){$('adminPrompts').innerHTML='';$('adminTutorials').innerHTML='';}
+  return;
+ }
+ const [pr,tu]=await Promise.all([
+  db.from('radar_prompts').select('id,titulo,categoria,conteudo,ativo,criado_em').eq('ativo',true).order('criado_em',{ascending:false}),
+  db.from('radar_tutoriais').select('id,titulo,descricao,storage_path,ativo,ordem,criado_em').eq('ativo',true).order('ordem',{ascending:true})
+ ]);
+ if(pr.error){console.error(pr.error);prompts.innerHTML='<div class="empty">Não foi possível carregar os prompts. Confira as tabelas e políticas SQL.</div>';}
+ else{promptRows=pr.data||[];prompts.innerHTML=promptRows.length?promptRows.map(p=>`<article class="content-card"><span class="pill">${esc(p.categoria||'Prompt')}</span><h3>${esc(p.titulo)}</h3><pre>${esc(p.conteudo)}</pre><button class="primary" onclick="copyPrompt('${p.id}')">📋 Copiar prompt</button></article>`).join(''):'<div class="empty">Nenhum prompt publicado ainda.</div>';}
+ if(tu.error){console.error(tu.error);tutorials.innerHTML='<div class="empty">Não foi possível carregar os vídeos. Confira a tabela, o bucket e as políticas de armazenamento.</div>';}
+ else{
+  tutorialRows=tu.data||[];const cards=await Promise.all(tutorialRows.map(async t=>{const {data,error}=await db.storage.from(UGC_BUCKET).createSignedUrl(t.storage_path,3600);if(error)return `<article class="content-card"><h3>${esc(t.titulo)}</h3><p class="muted">Vídeo indisponível: ${esc(error.message)}</p></article>`;return `<article class="content-card"><h3>${esc(t.titulo)}</h3><p class="muted">${esc(t.descricao||'')}</p><video controls playsinline preload="metadata" src="${esc(data.signedUrl)}"></video></article>`;}));
+  tutorials.innerHTML=cards.join('')||'<div class="empty">Nenhum vídeo publicado ainda.</div>';
+ }
+ if(isAdmin){
+  $('adminPrompts').innerHTML=promptRows.map(p=>`<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line);padding:8px 0"><span>${esc(p.titulo)}</span><span><button class="soft" onclick="editPrompt('${p.id}')">Editar</button><button class="danger" onclick="deletePrompt('${p.id}')">Excluir</button></span></div>`).join('')||'Nenhum prompt cadastrado.';
+  $('adminTutorials').innerHTML=tutorialRows.map(t=>`<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line);padding:8px 0"><span>${esc(t.titulo)}</span><span><button class="soft" onclick="editTutorial('${t.id}')">Editar</button><button class="danger" onclick="deleteTutorial('${t.id}')">Excluir</button></span></div>`).join('')||'Nenhum vídeo cadastrado.';
+ }
+}
+async function copyPrompt(id){if(!canReadPaidLibrary())return alert('Assinatura paga necessária.');const p=promptRows.find(x=>String(x.id)===String(id));if(!p)return;try{await navigator.clipboard.writeText(p.conteudo);alert('Prompt copiado!');}catch(e){alert('Não foi possível copiar automaticamente.');}}
+function clearPromptForm(){ $('promptForm').reset();$('promptEditId').value=''; }
+function editPrompt(id){if(!isAdmin)return;const p=promptRows.find(x=>String(x.id)===String(id));if(!p)return;$('promptEditId').value=p.id;$('promptTitle').value=p.titulo;$('promptCategory').value=p.categoria||'';$('promptContent').value=p.conteudo;}
+async function savePrompt(e){e.preventDefault();if(!isAdmin)return alert('Acesso restrito.');const id=$('promptEditId').value;const row={titulo:$('promptTitle').value.trim(),categoria:$('promptCategory').value.trim()||null,conteudo:$('promptContent').value.trim(),ativo:true,criado_por:currentUser.id,atualizado_em:new Date().toISOString()};const q=id?db.from('radar_prompts').update(row).eq('id',id):db.from('radar_prompts').insert(row);const {error}=await q;if(error)return alert('Erro ao salvar prompt: '+error.message);clearPromptForm();await loadPaidLibraries();alert('Prompt salvo.');}
+async function deletePrompt(id){if(!isAdmin||!confirm('Excluir este prompt?'))return;const {error}=await db.from('radar_prompts').delete().eq('id',id);if(error)return alert(error.message);await loadPaidLibraries();}
+function clearTutorialForm(){ $('tutorialForm').reset();$('tutorialEditId').value='';$('tutorialOrder').value='0'; }
+function editTutorial(id){if(!isAdmin)return;const t=tutorialRows.find(x=>String(x.id)===String(id));if(!t)return;$('tutorialEditId').value=t.id;$('tutorialTitle').value=t.titulo;$('tutorialDescription').value=t.descricao||'';$('tutorialOrder').value=t.ordem||0;}
+async function saveTutorial(e){e.preventDefault();if(!isAdmin)return alert('Acesso restrito.');const id=$('tutorialEditId').value;const file=$('tutorialFile').files[0];let path=tutorialRows.find(x=>String(x.id)===String(id))?.storage_path||null;if(file){if(!file.type.startsWith('video/'))return alert('Selecione um arquivo de vídeo.');const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');path=`${currentUser.id}/${crypto.randomUUID()}-${safe}`;const up=await db.storage.from(UGC_BUCKET).upload(path,file,{upsert:false,contentType:file.type,cacheControl:'3600'});if(up.error)return alert('Falha no envio do vídeo: '+up.error.message);}if(!path)return alert('Selecione um vídeo para cadastrar.');const row={titulo:$('tutorialTitle').value.trim(),descricao:$('tutorialDescription').value.trim()||null,storage_path:path,ordem:Number($('tutorialOrder').value)||0,ativo:true,criado_por:currentUser.id,atualizado_em:new Date().toISOString()};const q=id?db.from('radar_tutoriais').update(row).eq('id',id):db.from('radar_tutoriais').insert(row);const {error}=await q;if(error)return alert('Erro ao salvar vídeo: '+error.message);clearTutorialForm();await loadPaidLibraries();alert('Vídeo salvo na biblioteca UGC/POV.');}
+async function deleteTutorial(id){if(!isAdmin||!confirm('Excluir este vídeo da biblioteca?'))return;const t=tutorialRows.find(x=>String(x.id)===String(id));if(!t)return;const {error}=await db.from('radar_tutoriais').delete().eq('id',id);if(error)return alert(error.message);const rm=await db.storage.from(UGC_BUCKET).remove([t.storage_path]);if(rm.error)console.warn('Registro excluído, mas o arquivo precisa ser removido manualmente:',rm.error);await loadPaidLibraries();}
+
+/* PRODUTOS SEM VENDAS CONFIRMADAS */
+async function loadZeroSalesProducts(){
+ const zero=$('zeroSalesList'),unknown=$('unknownSalesList');if(!zero||!unknown)return;
+ if(!currentUser){zero.innerHTML=unknown.innerHTML=paidLockMarkup();return;}
+ const {data,error}=await db.from('produtos').select('*').eq('ativo',true).order('criado_em',{ascending:false});
+ if(error){zero.innerHTML='<div class="empty">Erro ao consultar produtos: '+esc(error.message)+'</div>';return;}
+ const rows=data||[];const z=rows.filter(p=>p.ultima_sincronizacao!=null&&p.vendas!==null&&p.vendas!==undefined&&Number(p.vendas)===0);const u=rows.filter(p=>p.ultima_sincronizacao==null||p.vendas===null||p.vendas===undefined);
+ zero.innerHTML=z.length?z.map(p=>productCard({...p,origem:'manual',taxaComissao:p.taxa_comissao})).join(''):'<div class="empty">Nenhum produto com zero vendas confirmadas neste momento.</div>';
+ unknown.innerHTML=u.length?u.map(p=>`<article class="product"><h3>${esc(p.nome)}</h3><span class="pill hot">AGUARDANDO SINCRONIZAÇÃO</span><p class="muted">Ainda não há retorno confirmado de vendas para este produto.</p></article>`).join(''):'<div class="empty">Todos os produtos possuem informação de vendas.</div>';
+ $('countNew').textContent=z.length;
+}
+
 /* MONITORAMENTO DA SESSÃO */  
 db.auth.onAuthStateChange((_event,session)=>{  
  if(session){  
